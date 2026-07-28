@@ -7,7 +7,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
@@ -122,7 +121,6 @@
       background: rgba(255,255,255,0.08);
     }
     .form-group .error { color: #ff6b6b; font-size: 0.85rem; margin-top: 4px; }
-    .form-group .hint { color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; }
     .btn {
       border: none;
       padding: 14px 36px;
@@ -151,8 +149,6 @@
     .nomination-item:last-child { border-bottom: none; }
     .nomination-item .nom-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 4px; }
     .nomination-item .nom-sub { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 16px; }
-
-    /* Автодополнение */
     .autocomplete-wrapper { position: relative; }
     .autocomplete-wrapper input[type="text"] {
       width: 100%;
@@ -198,11 +194,7 @@
       color: #ffd700;
       font-weight: 600;
     }
-    .autocomplete-item.top-candidate::before {
-      content: '⭐ ';
-    }
-
-    /* Радио-кнопки */
+    .autocomplete-item.top-candidate::before { content: '⭐ '; }
     .candidate-options {
       display: flex;
       flex-direction: column;
@@ -257,7 +249,6 @@
       border-color: rgba(255,255,255,0.2);
     }
     .candidate-option span { flex: 1; }
-
     .nomination-status {
       font-size: 0.85rem;
       color: var(--text-muted);
@@ -279,7 +270,6 @@
     .blocked-message .blocked-icon { font-size: 4rem; }
     .blocked-message h2 { font-size: 1.8rem; margin: 16px 0; color: #ff6b6b; }
     .blocked-message p { color: var(--text-secondary); font-size: 1rem; }
-
     .admin-panel {
       margin-top: 30px;
       border-top: 1px solid var(--border-light);
@@ -350,9 +340,7 @@
     th { background: rgba(255,255,255,0.04); font-weight: 600; color: var(--text-secondary); }
     td { color: var(--text-primary); }
     .admin-actions { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
-
     .nick-with-tooltip { cursor: help; border-bottom: 1px dashed rgba(255,255,255,0.3); }
-
     @media (max-width: 600px) {
       .poll-wrapper { padding: 24px 16px; }
       .header h1 { font-size: 1.5rem; }
@@ -378,7 +366,7 @@
     <div class="blocked-message">
       <div class="blocked-icon">🚫</div>
       <h2>Вы уже голосовали</h2>
-      <p>С этого устройства или IP-адреса уже был отправлен голос. Повторное голосование невозможно.</p>
+      <p>С этого IP-адреса уже был отправлен голос. Повторное голосование невозможно.</p>
     </div>
   </div>
 
@@ -389,29 +377,7 @@
       <input type="text" id="playerNick" placeholder="Введите ник" />
       <div class="error" id="nickError"></div>
     </div>
-    <div class="form-group">
-      <label>Ваша почта</label>
-      <input type="email" id="playerEmail" placeholder="example@mail.com" />
-      <div class="error" id="emailError"></div>
-    </div>
-    <button class="btn btn-primary" id="getCodeBtn">Получить код →</button>
-  </div>
-
-  <div class="step" id="stepVerify">
-    <div class="step-title">🔑 Подтверждение</div>
-    <p style="color: var(--text-secondary); margin-bottom: 16px;">Введите код, отправленный на вашу почту</p>
-    <div class="form-group">
-      <label>Код из письма</label>
-      <input type="text" id="verifyCode" placeholder="Введите 6-значный код" maxlength="6" inputmode="numeric" />
-      <div class="error" id="codeError"></div>
-      <div class="hint" id="codeHint"></div>
-    </div>
-    <div id="demoCodeBlock" style="display: none; background: rgba(255,255,255,0.04); padding: 12px 20px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); text-align: center; margin-bottom: 16px;">
-      <span style="color: var(--text-muted);">Демо-режим: ваш код</span>
-      <div style="font-size: 2rem; font-weight: 700; letter-spacing: 8px; color: #fff; margin-top: 4px;" id="demoCodeDisplay">------</div>
-    </div>
-    <button class="btn btn-primary" id="verifyBtn">Подтвердить</button>
-    <button class="btn btn-secondary" id="backToRegisterBtn" style="margin-left: 12px;">Назад</button>
+    <button class="btn btn-primary" id="startSurveyBtn">Начать опрос →</button>
   </div>
 
   <div class="step" id="stepSurvey">
@@ -443,7 +409,7 @@
         <h3>📋 Список участников</h3>
         <div class="admin-table-wrap">
           <table>
-            <thead><tr><th>Ник</th><th>Почта</th><th>IP</th><th>Управление</th></tr></thead>
+            <thead><tr><th>Ник</th><th>IP</th><th>Управление</th></tr></thead>
             <tbody id="adminTableBody"></tbody>
           </table>
         </div>
@@ -458,15 +424,58 @@
 
 <script>
   // =============================================================
-  //  EMAILJS — ДЕМО-РЕЖИМ ВКЛЮЧЁН (код показывается на экране)
-  //  Для реальной отправки замените false на true
+  //  TELEGRAM CONFIG — ВСТАВЬТЕ СВОИ ДАННЫЕ
   // =============================================================
-  const EMAILJS_CONFIG = {
-    USE_EMAILJS: false,
-    SERVICE_ID: 'service_nnyjzgy',
-    TEMPLATE_ID: 'template_tpjpo6c',
-    USER_ID: 'sCSwstC3SHqXGkniw'
+  const TELEGRAM_CONFIG = {
+    BOT_TOKEN: '8745636025:AAHJVvRAHmd2WmrmndLvS65sHXQPAZGD8d4',
+    CHAT_ID: '7970596319'  // ← ваш ID
   };
+
+  // =============================================================
+  //  ОТПРАВКА В TELEGRAM
+  // =============================================================
+  async function sendToTelegram(playerData) {
+    const { nick, ip, answers } = playerData;
+    
+    let message = `🗳️ НОВОЕ ГОЛОСОВАНИЕ!\n\n`;
+    message += `👤 Ник: ${nick}\n`;
+    message += `📡 IP: ${ip}\n`;
+    message += `📅 Дата: ${new Date().toLocaleString()}\n\n`;
+    message += `📋 ОТВЕТЫ:\n`;
+    
+    NOMINATIONS.forEach(nom => {
+      const answer = answers[nom.id];
+      if (answer) {
+        message += `\n${nom.title}\n  ➜ ${answer.value}`;
+      }
+    });
+
+    try {
+      const response = await fetch(
+        `https://api.telegram.org/bot${TELEGRAM_CONFIG.BOT_TOKEN}/sendMessage`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: TELEGRAM_CONFIG.CHAT_ID,
+            text: message,
+            parse_mode: 'HTML'
+          })
+        }
+      );
+      
+      const result = await response.json();
+      if (result.ok) {
+        console.log('✅ Результаты отправлены в Telegram');
+      } else {
+        console.error('❌ Ошибка Telegram:', result);
+        alert('Не удалось отправить результаты в Telegram. Проверьте настройки бота.');
+      }
+    } catch (error) {
+      console.error('❌ Ошибка:', error);
+      alert('Ошибка соединения с Telegram');
+    }
+  }
 
   // =============================================================
   //  ЭНДЕР-СТОЛБЫ
@@ -486,8 +495,7 @@
   })();
 
   // =============================================================
-  //  СПИСОК ВСЕХ НИКОВ (для автодополнения)
-  //  + ГЛАВНЫЕ ПРЕТЕНДЕНТЫ ДЛЯ КАЖДОЙ НОМИНАЦИИ
+  //  ВСЕ НИКИ ДЛЯ АВТОДОПОЛНЕНИЯ
   // =============================================================
   const ALL_NICKS = [
     'Strika_Jarvis', 'Gate_ton', 'Tigr65789', 'livitody', 'meshokdeneg',
@@ -496,22 +504,25 @@
     'GG_Chaika', 'meshokRoma', 'Piska_mamonta'
   ];
 
+  // =============================================================
+  //  ГЛАВНЫЕ ПРЕТЕНДЕНТЫ ДЛЯ КАЖДОЙ НОМИНАЦИИ
+  // =============================================================
   const TOP_CANDIDATES = {
-    best_player: ['Mayorcraft', 'meshokdeneg', 'blebik❤️', 'Gate_ton', 'livitody'],
-    best_builder: ['meshokdeneg', 'Strika_Jarvis', 'livitody', 'Mayorcraft', 'Gate_ton'],
-    best_pvp: ['blebik❤️', 'Gate_ton', 'Mayorcraft', 'meshokRoma', 'Stalker'],
-    best_admin: ['AppleTob', 'meshokdeneg', 'Mayorcraft', 'Strika_Jarvis', 'Lord15986'],
-    best_pve: ['blebik❤️', 'Gate_ton', 'Stalker', 'tomatoma', 'Mayorcraft'],
-    best_noob: ['tomatoma', 'Stalker', 'Piska_mamonta', 'GG_Chaika', 'Tigr65789'],
-    best_farming: ['Gate_ton', 'tomatoma', 'Stalker', 'livitody', 'blebik❤️'],
-    best_redstone: ['meshokdeneg', 'Strika_Jarvis', 'livitody', 'Mayorcraft', 'Gate_ton'],
-    best_guildmaster: ['meshokdeneg', 'Mayorcraft', 'Lord15986'],
-    best_active: ['blebik❤️', 'meshokdeneg', 'Strika_Jarvis', 'Gate_ton', 'Stalker'],
-    best_troll: ['Gate_ton', 'meshokdeneg', 'AppleTob', 'Mayorcraft', 'Stalker']
+    best_player: ['Mayorcraft', 'meshokdeneg', 'blebik❤️', 'Gate_ton'],
+    best_builder: ['meshokdeneg', 'Strika_Jarvis', 'livitody', 'Mayorcraft'],
+    best_pvp: ['blebik❤️', 'Gate_ton', 'Mayorcraft', 'meshokRoma'],
+    best_admin: ['AppleTob', 'meshokdeneg', 'Mayorcraft', 'Strika_Jarvis'],
+    best_pve: ['blebik❤️', 'Gate_ton', 'Stalker', 'tomatoma'],
+    best_noob: ['tomatoma', 'Stalker', 'Piska_mamonta', 'GG_Chaika'],
+    best_farming: ['Gate_ton', 'tomatoma', 'Stalker', 'livitody'],
+    best_redstone: ['meshokdeneg', 'Strika_Jarvis', 'livitody', 'Mayorcraft'],
+    best_guildmaster: ['meshokdeneg', 'Mayorcraft', 'Lord15986', 'Gate_ton'],
+    best_active: ['blebik❤️', 'meshokdeneg', 'Strika_Jarvis', 'Gate_ton'],
+    best_troll: ['Gate_ton', 'meshokdeneg', 'AppleTob', 'Mayorcraft']
   };
 
   // =============================================================
-  //  15 НОМИНАЦИЙ (все вопросы и варианты ответов)
+  //  ВСЕ ВОПРОСЫ И ВАРИАНТЫ ОТВЕТОВ (15 НОМИНАЦИЙ)
   // =============================================================
   const NOMINATIONS = [
     { id: 'best_player', title: '🏅 Лучший игрок сезона', subtitle: 'Кто показал наилучшую игру?', type: 'nick' },
@@ -551,17 +562,14 @@
   ];
 
   // =============================================================
-  //  ОСНОВНАЯ ЛОГИКА (без изменений)
+  //  ОСНОВНАЯ ЛОГИКА
   // =============================================================
   const ADMIN_PASSWORD = 'admin123';
   let currentPlayer = null;
   let allPlayers = [];
   let allIPs = [];
-  let pendingNick = '';
-  let pendingEmail = '';
-  let generatedCode = '';
-  let activeAutocomplete = null;
   let userIP = null;
+  let activeAutocomplete = null;
 
   const $ = (id) => document.getElementById(id);
 
@@ -569,10 +577,12 @@
     try { allPlayers = JSON.parse(localStorage.getItem('nyash_all_players')) || []; } catch(e) { allPlayers = []; }
   }
   function saveAllPlayers() { localStorage.setItem('nyash_all_players', JSON.stringify(allPlayers)); }
+  
   function loadAllIPs() {
     try { allIPs = JSON.parse(localStorage.getItem('nyash_all_ips')) || []; } catch(e) { allIPs = []; }
   }
   function saveAllIPs() { localStorage.setItem('nyash_all_ips', JSON.stringify(allIPs)); }
+  
   function loadCurrentPlayer() {
     try { currentPlayer = JSON.parse(localStorage.getItem('nyash_current_player')); } catch(e) { currentPlayer = null; }
   }
@@ -580,34 +590,13 @@
     if (currentPlayer) localStorage.setItem('nyash_current_player', JSON.stringify(currentPlayer));
     else localStorage.removeItem('nyash_current_player');
   }
-  function findPlayerByNickOrEmail(nick, email) {
-    return allPlayers.find(p => p.nick.toLowerCase() === nick.toLowerCase() || p.email.toLowerCase() === email.toLowerCase());
-  }
+
   function isIPUsed(ip) { return allIPs.includes(ip); }
-  function hasVotedCookie() { return document.cookie.split('; ').find(row => row.startsWith('nyash_voted=')); }
-  function setVotedCookie() {
-    const date = new Date();
-    date.setFullYear(date.getFullYear() + 1);
-    document.cookie = `nyash_voted=true; expires=${date.toUTCString()}; path=/; SameSite=Strict`;
-  }
 
   function showStep(step) {
     document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
-    const map = { blocked: 'stepBlocked', register: 'stepRegister', verify: 'stepVerify', survey: 'stepSurvey', final: 'stepFinal' };
+    const map = { blocked: 'stepBlocked', register: 'stepRegister', survey: 'stepSurvey', final: 'stepFinal' };
     if (map[step]) $(map[step]).classList.add('active');
-  }
-
-  function generateCode() { return Math.floor(100000 + Math.random() * 900000).toString(); }
-
-  async function sendCode(email, nick, code) {
-    if (!EMAILJS_CONFIG.USE_EMAILJS) return true;
-    try {
-      await emailjs.init(EMAILJS_CONFIG.USER_ID);
-      await emailjs.send(EMAILJS_CONFIG.SERVICE_ID, EMAILJS_CONFIG.TEMPLATE_ID, {
-        to_email: email, to_name: nick, code: code, from_name: 'Nyash Awards'
-      });
-      return true;
-    } catch(e) { console.error('EmailJS error:', e); return false; }
   }
 
   async function getIP() {
@@ -619,86 +608,47 @@
   }
 
   function checkAlreadyVoted(ip) {
-    if (hasVotedCookie()) return true;
     if (ip && isIPUsed(ip)) return true;
     return false;
   }
 
-  function checkNickOrEmailUsed(nick, email) {
-    const existing = findPlayerByNickOrEmail(nick, email);
-    return existing && existing.completed;
-  }
-
-  $('getCodeBtn').addEventListener('click', async function() {
+  // === Регистрация ===
+  $('startSurveyBtn').addEventListener('click', async function() {
     const nick = $('playerNick').value.trim();
-    const email = $('playerEmail').value.trim();
-    let valid = true;
     $('nickError').textContent = '';
-    $('emailError').textContent = '';
-    if (!nick) { $('nickError').textContent = 'Введите ник'; valid = false; }
-    if (!email) { $('emailError').textContent = 'Введите почту'; valid = false; }
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { $('emailError').textContent = 'Введите корректную почту'; valid = false; }
-    if (!valid) return;
-
-    if (checkNickOrEmailUsed(nick, email)) {
-      alert('Этот ник или почта уже использовались для голосования. Повторное голосование невозможно.');
+    
+    if (!nick) {
+      $('nickError').textContent = 'Введите ник';
       return;
     }
 
-    pendingNick = nick;
-    pendingEmail = email;
-    generatedCode = generateCode();
-
-    const btn = $('getCodeBtn');
-    btn.disabled = true;
-    btn.textContent = 'Отправка...';
-
-    const sent = await sendCode(email, nick, generatedCode);
-    btn.disabled = false;
-    btn.textContent = 'Получить код →';
-
-    if (!sent) { alert('Не удалось отправить код.'); return; }
-
-    if (!EMAILJS_CONFIG.USE_EMAILJS) {
-      $('demoCodeBlock').style.display = 'block';
-      $('demoCodeDisplay').textContent = generatedCode;
-      $('codeHint').textContent = '📨 Демо-режим: код показан выше';
-    } else {
-      $('demoCodeBlock').style.display = 'none';
-      $('codeHint').textContent = '✉️ Код отправлен на почту';
+    if (checkAlreadyVoted(userIP)) {
+      showStep('blocked');
+      return;
     }
-    showStep('verify');
-    $('verifyCode').value = '';
-    $('codeError').textContent = '';
+
+    const existing = allPlayers.find(p => p.nick.toLowerCase() === nick.toLowerCase());
+    if (existing) {
+      $('nickError').textContent = 'Этот ник уже используется';
+      return;
+    }
+
+    currentPlayer = {
+      nick: nick,
+      ip: userIP,
+      answers: {},
+      completed: false
+    };
+    allPlayers.push(currentPlayer);
+    saveAllPlayers();
+    saveCurrentPlayer();
+    
+    showStep('survey');
+    renderSurvey();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
-  $('verifyBtn').addEventListener('click', function() {
-    const entered = $('verifyCode').value.trim();
-    if (!entered) { $('codeError').textContent = 'Введите код'; return; }
-    if (entered === generatedCode) {
-      currentPlayer = { nick: pendingNick, email: pendingEmail, ip: userIP, answers: {}, completed: false, verified: true };
-      allPlayers.push(currentPlayer);
-      saveAllPlayers();
-      saveCurrentPlayer();
-      showStep('survey');
-      renderSurvey();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else { $('codeError').textContent = 'Неверный код'; }
-  });
-
-  $('backToRegisterBtn').addEventListener('click', function() {
-    showStep('register');
-    $('verifyCode').value = '';
-    $('codeError').textContent = '';
-    $('demoCodeBlock').style.display = 'none';
-  });
-
-  function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  }
-
+  // === Опрос ===
   function renderSurvey() {
     if (!currentPlayer) return;
     const answers = currentPlayer.answers || {};
@@ -848,7 +798,7 @@
     if (!currentPlayer.answers) currentPlayer.answers = {};
     currentPlayer.answers[nomId] = answer;
     saveCurrentPlayer();
-    const idx = allPlayers.findIndex(p => p.nick === currentPlayer.nick && p.email === currentPlayer.email);
+    const idx = allPlayers.findIndex(p => p.nick === currentPlayer.nick && p.ip === currentPlayer.ip);
     if (idx !== -1) { allPlayers[idx].answers = currentPlayer.answers; saveAllPlayers(); }
     updateSurveyStatus();
   }
@@ -857,7 +807,7 @@
     if (!currentPlayer || !currentPlayer.answers) return;
     delete currentPlayer.answers[nomId];
     saveCurrentPlayer();
-    const idx = allPlayers.findIndex(p => p.nick === currentPlayer.nick && p.email === currentPlayer.email);
+    const idx = allPlayers.findIndex(p => p.nick === currentPlayer.nick && p.ip === currentPlayer.ip);
     if (idx !== -1) { allPlayers[idx].answers = currentPlayer.answers; saveAllPlayers(); }
     updateSurveyStatus();
   }
@@ -876,58 +826,70 @@
     });
   }
 
-  $('submitSurveyBtn').addEventListener('click', function() {
+  // === Завершение опроса ===
+  $('submitSurveyBtn').addEventListener('click', async function() {
     if (!currentPlayer) return;
     const allAnswered = NOMINATIONS.every(nom => currentPlayer.answers[nom.id]);
     if (!allAnswered) { alert('Ответьте на все вопросы!'); return; }
-    if (checkNickOrEmailUsed(currentPlayer.nick, currentPlayer.email)) {
-      alert('Этот ник или почта уже использовались.');
-      return;
-    }
-    if (currentPlayer.ip && isIPUsed(currentPlayer.ip)) {
+    
+    if (isIPUsed(currentPlayer.ip)) {
       alert('С этого IP уже голосовали.');
+      showStep('blocked');
       return;
     }
+    
     currentPlayer.completed = true;
     saveCurrentPlayer();
+    
     if (currentPlayer.ip && !isIPUsed(currentPlayer.ip)) {
       allIPs.push(currentPlayer.ip);
       saveAllIPs();
     }
-    const idx = allPlayers.findIndex(p => p.nick === currentPlayer.nick && p.email === currentPlayer.email);
+    
+    const idx = allPlayers.findIndex(p => p.nick === currentPlayer.nick && p.ip === currentPlayer.ip);
     if (idx !== -1) { allPlayers[idx].completed = true; saveAllPlayers(); }
-    setVotedCookie();
+    
+    // Отправляем в Telegram
+    await sendToTelegram(currentPlayer);
+    
     showStep('final');
   });
 
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // === Админ-панель ===
   let adminLoggedIn = false;
 
-  function deletePlayer(nick, email) {
+  function deletePlayer(nick) {
     if (!confirm(`Удалить игрока ${nick}?\nОн сможет пройти опрос заново.`)) return;
-    const playerToDelete = allPlayers.find(p => p.nick === nick && p.email === email);
+    
+    const playerToDelete = allPlayers.find(p => p.nick === nick);
     if (playerToDelete && playerToDelete.ip) {
       allIPs = allIPs.filter(ip => ip !== playerToDelete.ip);
       saveAllIPs();
     }
-    allPlayers = allPlayers.filter(p => !(p.nick === nick && p.email === email));
+    
+    allPlayers = allPlayers.filter(p => p.nick !== nick);
     saveAllPlayers();
-    if (currentPlayer && currentPlayer.nick === nick && currentPlayer.email === email) {
+    
+    if (currentPlayer && currentPlayer.nick === nick) {
       currentPlayer = null;
       saveCurrentPlayer();
     }
-    document.cookie = 'nyash_voted=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
-    document.cookie = 'nyash_voted=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=' + location.hostname;
-    document.cookie = 'nyash_voted=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.' + location.hostname;
-    localStorage.removeItem('nyash_current_player');
+    
     renderAdminTable();
-    alert(`${nick} удалён! Теперь он может зайти заново.`);
+    alert(`${nick} удалён! Теперь он может пройти опрос заново.`);
   }
 
   function renderAdminTable() {
     const tbody = $('adminTableBody');
     tbody.innerHTML = '';
     if (allPlayers.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">Нет данных</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--text-muted);">Нет данных</td></tr>';
       return;
     }
     allPlayers.forEach(p => {
@@ -948,10 +910,9 @@
             ${escapeHtml(p.nick)} ${p.completed ? '✅' : '⏳'}
           </span>
         </td>
-        <td>${escapeHtml(p.email)}</td>
         <td style="font-size:0.8rem; color:var(--text-muted);">${escapeHtml(p.ip || 'неизвестно')}</td>
         <td>
-          <button class="btn btn-sm delete-player-btn" data-nick="${escapeHtml(p.nick)}" data-email="${escapeHtml(p.email)}" 
+          <button class="btn btn-sm delete-player-btn" data-nick="${escapeHtml(p.nick)}" 
                   style="background:#ff4444; color:#fff; border:none; padding:6px 14px; font-size:0.8rem; cursor:pointer; border-radius:20px;">
             🗑️ Сброс
           </button>
@@ -961,7 +922,7 @@
 
     document.querySelectorAll('.delete-player-btn').forEach(btn => {
       btn.addEventListener('click', function() {
-        deletePlayer(this.dataset.nick, this.dataset.email);
+        deletePlayer(this.dataset.nick);
       });
     });
 
@@ -1041,21 +1002,33 @@
 
   $('exportJsonBtn').addEventListener('click', exportJson);
 
+  // === Инициализация ===
   async function initApp() {
     loadAllPlayers();
     loadAllIPs();
     userIP = await getIP();
-    if (checkAlreadyVoted(userIP)) { showStep('blocked'); return; }
+    
+    if (checkAlreadyVoted(userIP)) { 
+      showStep('blocked'); 
+      return; 
+    }
+    
     loadCurrentPlayer();
     if (currentPlayer) {
       if (currentPlayer.completed) {
         if (!isIPUsed(currentPlayer.ip)) { allIPs.push(currentPlayer.ip); saveAllIPs(); }
-        setVotedCookie();
         showStep('final');
-      } else if (currentPlayer.verified) { showStep('survey'); renderSurvey(); }
-      else { localStorage.removeItem('nyash_current_player'); currentPlayer = null; showStep('register'); }
-    } else { showStep('register'); }
-    if (EMAILJS_CONFIG.USE_EMAILJS) emailjs.init(EMAILJS_CONFIG.USER_ID);
+      } else if (Object.keys(currentPlayer.answers || {}).length > 0) {
+        showStep('survey');
+        renderSurvey();
+      } else {
+        localStorage.removeItem('nyash_current_player');
+        currentPlayer = null;
+        showStep('register');
+      }
+    } else {
+      showStep('register');
+    }
   }
 
   document.addEventListener('DOMContentLoaded', initApp);
