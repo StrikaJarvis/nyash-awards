@@ -141,6 +141,8 @@
     .btn-secondary { background: transparent; border-color: rgba(255,255,255,0.15); color: var(--text-secondary); }
     .btn-secondary:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.3); }
     .btn-sm { padding: 10px 20px; font-size: 0.85rem; }
+    .btn-danger { background: #ff4444; color: #fff; border-color: #ff4444; }
+    .btn-danger:hover { background: #cc0000; }
     .nomination-item {
       margin-bottom: 32px;
       padding-bottom: 24px;
@@ -414,6 +416,7 @@
           </table>
         </div>
         <div class="admin-actions">
+          <button class="btn btn-danger btn-sm" id="resetAllBtn">🗑️ Очистить всё</button>
           <button class="btn btn-secondary btn-sm" id="exportJsonBtn">📥 Скачать JSON</button>
           <button class="btn btn-secondary btn-sm" id="adminLogoutBtn">Выйти</button>
         </div>
@@ -424,78 +427,57 @@
 
 <script>
   // =============================================================
-  //  TELEGRAM CONFIG — ВСТАВЬТЕ СВОИ ДАННЫЕ
+  //  TELEGRAM CONFIG
   // =============================================================
   const TELEGRAM_CONFIG = {
     BOT_TOKEN: '8745636025:AAHJVvRAHmd2WmrmndLvS65sHXQPAZGD8d4',
-    CHAT_ID: '7970596319'  // ← ваш ID
+    CHAT_ID: '7970596319'
   };
 
-  // =============================================================
-  //  ОТПРАВКА В TELEGRAM
-  // =============================================================
   async function sendToTelegram(playerData) {
     const { nick, ip, answers } = playerData;
-    
     let message = `🗳️ НОВОЕ ГОЛОСОВАНИЕ!\n\n`;
     message += `👤 Ник: ${nick}\n`;
     message += `📡 IP: ${ip}\n`;
     message += `📅 Дата: ${new Date().toLocaleString()}\n\n`;
     message += `📋 ОТВЕТЫ:\n`;
-    
     NOMINATIONS.forEach(nom => {
       const answer = answers[nom.id];
-      if (answer) {
-        message += `\n${nom.title}\n  ➜ ${answer.value}`;
-      }
+      if (answer) message += `\n${nom.title}\n  ➜ ${answer.value}`;
     });
-
     try {
-      const response = await fetch(
-        `https://api.telegram.org/bot${TELEGRAM_CONFIG.BOT_TOKEN}/sendMessage`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: TELEGRAM_CONFIG.CHAT_ID,
-            text: message,
-            parse_mode: 'HTML'
-          })
-        }
-      );
-      
+      const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_CONFIG.BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: TELEGRAM_CONFIG.CHAT_ID, text: message, parse_mode: 'HTML' })
+      });
       const result = await response.json();
-      if (result.ok) {
-        console.log('✅ Результаты отправлены в Telegram');
-      } else {
-        console.error('❌ Ошибка Telegram:', result);
-        alert('Не удалось отправить результаты в Telegram. Проверьте настройки бота.');
-      }
-    } catch (error) {
-      console.error('❌ Ошибка:', error);
-      alert('Ошибка соединения с Telegram');
-    }
+      if (!result.ok) console.error('❌ Ошибка Telegram:', result);
+    } catch (error) { console.error('❌ Ошибка:', error); }
   }
 
   // =============================================================
-  //  ЭНДЕР-СТОЛБЫ
+  //  ЭНДЕР-СТОЛБЫ — 35 ШТУК ПО ВСЕМУ ФОНУ
   // =============================================================
   (function createPillars() {
     const container = document.getElementById('pillarsContainer');
-    for (let i = 0; i < 18; i++) {
+    const count = 35;
+    for (let i = 0; i < count; i++) {
       const pillar = document.createElement('div');
       pillar.className = 'pillar';
-      pillar.style.left = (15 + Math.random() * 70) + '%';
-      pillar.style.height = (30 + Math.random() * 70) + '%';
-      pillar.style.width = (1.5 + Math.random() * 3) + 'px';
-      pillar.style.animationDelay = (Math.random() * 6).toFixed(2) + 's';
-      pillar.style.animationDuration = (3 + Math.random() * 5) + 's';
+      pillar.style.left = Math.random() * 100 + '%';
+      pillar.style.height = (20 + Math.random() * 80) + '%';
+      pillar.style.width = (1.5 + Math.random() * 3.5) + 'px';
+      pillar.style.animationDelay = (Math.random() * 8).toFixed(2) + 's';
+      pillar.style.animationDuration = (3 + Math.random() * 6) + 's';
+      const opacity = 0.2 + Math.random() * 0.7;
+      pillar.style.opacity = opacity;
       container.appendChild(pillar);
     }
   })();
 
   // =============================================================
-  //  ВСЕ НИКИ ДЛЯ АВТОДОПОЛНЕНИЯ
+  //  ВСЕ НИКИ
   // =============================================================
   const ALL_NICKS = [
     'Strika_Jarvis', 'Gate_ton', 'Tigr65789', 'livitody', 'meshokdeneg',
@@ -504,9 +486,6 @@
     'GG_Chaika', 'meshokRoma', 'Piska_mamonta'
   ];
 
-  // =============================================================
-  //  ГЛАВНЫЕ ПРЕТЕНДЕНТЫ ДЛЯ КАЖДОЙ НОМИНАЦИИ
-  // =============================================================
   const TOP_CANDIDATES = {
     best_player: ['Mayorcraft', 'meshokdeneg', 'blebik❤️', 'Gate_ton'],
     best_builder: ['meshokdeneg', 'Strika_Jarvis', 'livitody', 'Mayorcraft'],
@@ -521,49 +500,36 @@
     best_troll: ['Gate_ton', 'meshokdeneg', 'AppleTob', 'Mayorcraft']
   };
 
-  // =============================================================
-  //  ВСЕ ВОПРОСЫ И ВАРИАНТЫ ОТВЕТОВ (15 НОМИНАЦИЙ)
-  // =============================================================
   const NOMINATIONS = [
     { id: 'best_player', title: '🏅 Лучший игрок сезона', subtitle: 'Кто показал наилучшую игру?', type: 'nick' },
     { id: 'best_builder', title: '🏗️ Лучший строитель', subtitle: 'Чьи постройки впечатлили всех?', type: 'nick' },
     { id: 'best_pvp', title: '⚔️ Лучший PvP-игрок', subtitle: 'Кто сильнейший на арене?', type: 'nick' },
     { id: 'best_event', title: '🎉 Лучший ивент сезона', subtitle: 'Какое событие вам запомнилось?', type: 'test', candidates: [
       'игра meshokdeneg "пародия на игру в кальмара"',
-      'данж Анатолия',
-      'испытания Strika',
-      'красный круг'
+      'данж Анатолия', 'испытания Strika', 'красный круг'
     ]},
     { id: 'best_meme', title: '😂 Лучший мем', subtitle: 'Какой мем запомнился больше всего?', type: 'test', candidates: [
       'ядерка',
       'пивной дом (когда в доме Лорда весь воздух был заменён на пиво)',
-      'ЭТО СПАРТА!!!!!',
-      'дай опку (относится к meshokdeneg)'
+      'ЭТО СПАРТА!!!!!', 'дай опку (относится к meshokdeneg)'
     ]},
     { id: 'best_admin', title: '🛡️ Лучший администратор', subtitle: 'Кто внёс наибольший вклад в порядок?', type: 'nick' },
     { id: 'best_pve', title: '🧟 Лучший PvE-игрок', subtitle: 'Кто покорял данжи и боссов?', type: 'nick' },
     { id: 'best_noob', title: '🌱 Лучший новичок', subtitle: 'Кто быстро вырос и впечатлил?', type: 'nick' },
     { id: 'best_project', title: '📐 Лучший проект', subtitle: 'Какое коллективное творение достойно награды?', type: 'test', candidates: [
-      'данж Анатолия',
-      'база админов (с ядерной бомбой)',
-      'бар Лорда',
-      'общага'
+      'данж Анатолия', 'база админов (с ядерной бомбой)',
+      'бар Лорда', 'общага'
     ]},
     { id: 'best_farming', title: '🌾 Лучший фармер', subtitle: 'Кто собрал больше всего ресурсов?', type: 'nick' },
     { id: 'best_redstone', title: '🔌 Лучший редстоун-инженер', subtitle: 'Чьи механизмы поражают воображение?', type: 'nick' },
     { id: 'best_team', title: '🤝 Лучшая PvE-команда', subtitle: 'Какая команда показала лучшую слаженность?', type: 'test', candidates: [
-      'Коммунисты',
-      'Демократы',
-      'Анархисты'
+      'Коммунисты', 'Демократы', 'Анархисты'
     ]},
     { id: 'best_guildmaster', title: '🏰 Лучший глава гильдии', subtitle: 'Кто вдохновляет и объединяет игроков?', type: 'nick' },
     { id: 'best_active', title: '🔥 Самый активный игрок', subtitle: 'Кто был на сервере чаще всех?', type: 'nick' },
     { id: 'best_troll', title: '🧌 Главный тролль', subtitle: 'Кто главный тролль сервера?', type: 'nick' }
   ];
 
-  // =============================================================
-  //  ОСНОВНАЯ ЛОГИКА
-  // =============================================================
   const ADMIN_PASSWORD = 'admin123';
   let currentPlayer = null;
   let allPlayers = [];
@@ -577,12 +543,10 @@
     try { allPlayers = JSON.parse(localStorage.getItem('nyash_all_players')) || []; } catch(e) { allPlayers = []; }
   }
   function saveAllPlayers() { localStorage.setItem('nyash_all_players', JSON.stringify(allPlayers)); }
-  
   function loadAllIPs() {
     try { allIPs = JSON.parse(localStorage.getItem('nyash_all_ips')) || []; } catch(e) { allIPs = []; }
   }
   function saveAllIPs() { localStorage.setItem('nyash_all_ips', JSON.stringify(allIPs)); }
-  
   function loadCurrentPlayer() {
     try { currentPlayer = JSON.parse(localStorage.getItem('nyash_current_player')); } catch(e) { currentPlayer = null; }
   }
@@ -590,13 +554,26 @@
     if (currentPlayer) localStorage.setItem('nyash_current_player', JSON.stringify(currentPlayer));
     else localStorage.removeItem('nyash_current_player');
   }
-
   function isIPUsed(ip) { return allIPs.includes(ip); }
-
   function showStep(step) {
     document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
     const map = { blocked: 'stepBlocked', register: 'stepRegister', survey: 'stepSurvey', final: 'stepFinal' };
     if (map[step]) $(map[step]).classList.add('active');
+  }
+
+  // =============================================================
+  //  ФУНКЦИЯ ДЛЯ УДАЛЕНИЯ ВСЕХ КУК (чтобы можно было проголосовать заново)
+  // =============================================================
+  function deleteAllCookies() {
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i];
+      const eqPos = cookie.indexOf("=");
+      const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=" + location.hostname;
+      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=." + location.hostname;
+    }
   }
 
   async function getIP() {
@@ -606,43 +583,19 @@
       return data.ip;
     } catch(e) { return 'unknown_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9); }
   }
-
-  function checkAlreadyVoted(ip) {
-    if (ip && isIPUsed(ip)) return true;
-    return false;
-  }
+  function checkAlreadyVoted(ip) { return ip && isIPUsed(ip); }
 
   // === Регистрация ===
   $('startSurveyBtn').addEventListener('click', async function() {
     const nick = $('playerNick').value.trim();
     $('nickError').textContent = '';
-    
-    if (!nick) {
-      $('nickError').textContent = 'Введите ник';
-      return;
-    }
-
-    if (checkAlreadyVoted(userIP)) {
-      showStep('blocked');
-      return;
-    }
-
+    if (!nick) { $('nickError').textContent = 'Введите ник'; return; }
+    if (checkAlreadyVoted(userIP)) { showStep('blocked'); return; }
     const existing = allPlayers.find(p => p.nick.toLowerCase() === nick.toLowerCase());
-    if (existing) {
-      $('nickError').textContent = 'Этот ник уже используется';
-      return;
-    }
-
-    currentPlayer = {
-      nick: nick,
-      ip: userIP,
-      answers: {},
-      completed: false
-    };
+    if (existing) { $('nickError').textContent = 'Этот ник уже используется'; return; }
+    currentPlayer = { nick, ip: userIP, answers: {}, completed: false };
     allPlayers.push(currentPlayer);
-    saveAllPlayers();
-    saveCurrentPlayer();
-    
+    saveAllPlayers(); saveCurrentPlayer();
     showStep('survey');
     renderSurvey();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -652,41 +605,31 @@
   function renderSurvey() {
     if (!currentPlayer) return;
     const answers = currentPlayer.answers || {};
-    let html = '';
-    let answeredCount = 0;
-
+    let html = ''; let answeredCount = 0;
     NOMINATIONS.forEach(nom => {
       const answer = answers[nom.id] || null;
       if (answer) answeredCount++;
-
       html += `<div class="nomination-item" data-nom-id="${nom.id}">`;
       html += `<div class="nom-title">${nom.title}</div>`;
       html += `<div class="nom-sub">${nom.subtitle}</div>`;
-
       if (nom.type === 'test') {
         html += `<div class="candidate-options">`;
         nom.candidates.forEach(cand => {
           const checked = (answer && answer.value === cand) ? 'checked' : '';
-          html += `
-            <label class="candidate-option">
-              <input type="radio" name="nom_${nom.id}" value="${escapeHtml(cand)}" ${checked} data-nom="${nom.id}" />
-              <div class="radio-circle"></div>
-              <span>${escapeHtml(cand)}</span>
-            </label>`;
+          html += `<label class="candidate-option">
+            <input type="radio" name="nom_${nom.id}" value="${escapeHtml(cand)}" ${checked} data-nom="${nom.id}" />
+            <div class="radio-circle"></div><span>${escapeHtml(cand)}</span>
+          </label>`;
         });
         html += `</div>`;
       } else {
-        html += `<div class="autocomplete-wrapper">`;
-        html += `<input type="text" class="nomination-input" data-nom="${nom.id}" 
-                  placeholder="Начните вводить ник..." value="${escapeHtml(answer ? answer.value : '')}" autocomplete="off" />`;
-        html += `<div class="autocomplete-dropdown"></div>`;
-        html += `</div>`;
+        html += `<div class="autocomplete-wrapper">
+          <input type="text" class="nomination-input" data-nom="${nom.id}" placeholder="Начните вводить ник..." value="${escapeHtml(answer ? answer.value : '')}" autocomplete="off" />
+          <div class="autocomplete-dropdown"></div>
+        </div>`;
       }
-
-      html += `<div class="nomination-status">${answer ? '✅ Отвечено' : '⏳ Ожидает ответа'}</div>`;
-      html += `</div>`;
+      html += `<div class="nomination-status">${answer ? '✅ Отвечено' : '⏳ Ожидает ответа'}</div></div>`;
     });
-
     $('surveyContainer').innerHTML = html;
     $('progressText').textContent = `${answeredCount} / ${NOMINATIONS.length}`;
     $('submitSurveyBtn').disabled = (answeredCount < NOMINATIONS.length);
@@ -702,7 +645,6 @@
       const wrapper = input.parentElement;
       const dropdown = wrapper.querySelector('.autocomplete-dropdown');
       const nomId = input.dataset.nom;
-
       input.addEventListener('input', function() {
         const val = this.value.trim();
         if (val) saveAnswer(nomId, { type: 'nick', value: val });
@@ -710,19 +652,10 @@
         updateSurveyStatus();
         showAutocomplete(this, dropdown, nomId);
       });
-
-      input.addEventListener('focus', function() {
-        showAutocomplete(this, dropdown, nomId);
-        activeAutocomplete = { input, dropdown };
-      });
-
+      input.addEventListener('focus', function() { showAutocomplete(this, dropdown, nomId); activeAutocomplete = { input, dropdown }; });
       input.addEventListener('blur', function() {
-        setTimeout(() => {
-          dropdown.classList.remove('active');
-          if (activeAutocomplete && activeAutocomplete.input === input) activeAutocomplete = null;
-        }, 150);
+        setTimeout(() => { dropdown.classList.remove('active'); if (activeAutocomplete && activeAutocomplete.input === input) activeAutocomplete = null; }, 150);
       });
-
       input.addEventListener('keydown', function(e) {
         if (e.key === 'ArrowDown') { e.preventDefault(); navigateDropdown(dropdown, 1); }
         else if (e.key === 'ArrowUp') { e.preventDefault(); navigateDropdown(dropdown, -1); }
@@ -730,32 +663,21 @@
         else if (e.key === 'Escape') { dropdown.classList.remove('active'); }
       });
     });
-
     updateSurveyStatus();
   }
 
   function showAutocomplete(input, dropdown, nomId) {
     const val = input.value.toLowerCase().trim();
     dropdown.innerHTML = '';
-    
     let matches;
-    if (!val) {
-      const topNicks = TOP_CANDIDATES[nomId] || [];
-      matches = topNicks.length > 0 ? topNicks : ALL_NICKS;
-    } else {
-      matches = ALL_NICKS.filter(nick => nick.toLowerCase().startsWith(val));
-    }
-    
+    if (!val) { const topNicks = TOP_CANDIDATES[nomId] || []; matches = topNicks.length > 0 ? topNicks : ALL_NICKS; }
+    else { matches = ALL_NICKS.filter(nick => nick.toLowerCase().startsWith(val)); }
     if (matches.length === 0) { dropdown.classList.remove('active'); return; }
-
     const topNicks = TOP_CANDIDATES[nomId] || [];
-    
     matches.forEach(nick => {
       const div = document.createElement('div');
       div.className = 'autocomplete-item';
-      if (!val && topNicks.includes(nick)) {
-        div.classList.add('top-candidate');
-      }
+      if (!val && topNicks.includes(nick)) div.classList.add('top-candidate');
       div.textContent = nick;
       div.addEventListener('mousedown', function(e) {
         e.preventDefault();
@@ -831,27 +753,13 @@
     if (!currentPlayer) return;
     const allAnswered = NOMINATIONS.every(nom => currentPlayer.answers[nom.id]);
     if (!allAnswered) { alert('Ответьте на все вопросы!'); return; }
-    
-    if (isIPUsed(currentPlayer.ip)) {
-      alert('С этого IP уже голосовали.');
-      showStep('blocked');
-      return;
-    }
-    
+    if (isIPUsed(currentPlayer.ip)) { alert('С этого IP уже голосовали.'); showStep('blocked'); return; }
     currentPlayer.completed = true;
     saveCurrentPlayer();
-    
-    if (currentPlayer.ip && !isIPUsed(currentPlayer.ip)) {
-      allIPs.push(currentPlayer.ip);
-      saveAllIPs();
-    }
-    
+    if (currentPlayer.ip && !isIPUsed(currentPlayer.ip)) { allIPs.push(currentPlayer.ip); saveAllIPs(); }
     const idx = allPlayers.findIndex(p => p.nick === currentPlayer.nick && p.ip === currentPlayer.ip);
     if (idx !== -1) { allPlayers[idx].completed = true; saveAllPlayers(); }
-    
-    // Отправляем в Telegram
     await sendToTelegram(currentPlayer);
-    
     showStep('final');
   });
 
@@ -866,23 +774,33 @@
 
   function deletePlayer(nick) {
     if (!confirm(`Удалить игрока ${nick}?\nОн сможет пройти опрос заново.`)) return;
-    
     const playerToDelete = allPlayers.find(p => p.nick === nick);
     if (playerToDelete && playerToDelete.ip) {
       allIPs = allIPs.filter(ip => ip !== playerToDelete.ip);
       saveAllIPs();
     }
-    
     allPlayers = allPlayers.filter(p => p.nick !== nick);
     saveAllPlayers();
-    
-    if (currentPlayer && currentPlayer.nick === nick) {
-      currentPlayer = null;
-      saveCurrentPlayer();
-    }
-    
+    if (currentPlayer && currentPlayer.nick === nick) { currentPlayer = null; saveCurrentPlayer(); }
+    // Удаляем куки, чтобы можно было проголосовать заново
+    deleteAllCookies();
     renderAdminTable();
-    alert(`${nick} удалён! Теперь он может пройти опрос заново.`);
+    alert(`${nick} удалён! Теперь он может проголосовать заново.`);
+  }
+
+  function resetAllData() {
+    if (!confirm('ВНИМАНИЕ! Это удалит ВСЕ голоса и всех игроков. Продолжить?')) return;
+    if (!confirm('Вы уверены? Это действие необратимо.')) return;
+    localStorage.removeItem('nyash_all_players');
+    localStorage.removeItem('nyash_all_ips');
+    localStorage.removeItem('nyash_current_player');
+    allPlayers = [];
+    allIPs = [];
+    currentPlayer = null;
+    // Удаляем ВСЕ куки, чтобы можно было проголосовать заново
+    deleteAllCookies();
+    renderAdminTable();
+    alert('Все данные сброшены. Теперь можно начинать голосование заново.');
   }
 
   function renderAdminTable() {
@@ -903,27 +821,15 @@
         });
         tooltipText = parts.join('\n');
       } else { tooltipText = 'Нет ответов'; }
-
       tr.innerHTML = `
-        <td>
-          <span class="nick-with-tooltip" data-tooltip="${escapeHtml(tooltipText).replace(/"/g, '&quot;')}">
-            ${escapeHtml(p.nick)} ${p.completed ? '✅' : '⏳'}
-          </span>
-        </td>
+        <td><span class="nick-with-tooltip" data-tooltip="${escapeHtml(tooltipText).replace(/"/g, '&quot;')}">${escapeHtml(p.nick)} ${p.completed ? '✅' : '⏳'}</span></td>
         <td style="font-size:0.8rem; color:var(--text-muted);">${escapeHtml(p.ip || 'неизвестно')}</td>
-        <td>
-          <button class="btn btn-sm delete-player-btn" data-nick="${escapeHtml(p.nick)}" 
-                  style="background:#ff4444; color:#fff; border:none; padding:6px 14px; font-size:0.8rem; cursor:pointer; border-radius:20px;">
-            🗑️ Сброс
-          </button>
-        </td>`;
+        <td><button class="btn btn-sm delete-player-btn" data-nick="${escapeHtml(p.nick)}" style="background:#ff4444; color:#fff; border:none; padding:6px 14px; font-size:0.8rem; cursor:pointer; border-radius:20px;">🗑️ Сброс</button></td>`;
       tbody.appendChild(tr);
     });
 
     document.querySelectorAll('.delete-player-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
-        deletePlayer(this.dataset.nick);
-      });
+      btn.addEventListener('click', function() { deletePlayer(this.dataset.nick); });
     });
 
     let tooltipEl = document.getElementById('admin-tooltip');
@@ -938,7 +844,6 @@
       `;
       document.body.appendChild(tooltipEl);
     }
-
     document.querySelectorAll('.nick-with-tooltip').forEach(el => {
       el.addEventListener('mouseenter', function(e) {
         tooltipEl.textContent = this.dataset.tooltip;
@@ -971,6 +876,7 @@
     URL.revokeObjectURL(a.href);
   }
 
+  // === Админ-панель обработчики ===
   $('adminToggleBtn').addEventListener('click', function() {
     const active = $('adminContent').classList.toggle('active');
     this.textContent = active ? '🔒 Скрыть админ-панель' : '🔐 Админ-панель';
@@ -1001,18 +907,14 @@
   });
 
   $('exportJsonBtn').addEventListener('click', exportJson);
+  $('resetAllBtn').addEventListener('click', resetAllData);
 
   // === Инициализация ===
   async function initApp() {
     loadAllPlayers();
     loadAllIPs();
     userIP = await getIP();
-    
-    if (checkAlreadyVoted(userIP)) { 
-      showStep('blocked'); 
-      return; 
-    }
-    
+    if (checkAlreadyVoted(userIP)) { showStep('blocked'); return; }
     loadCurrentPlayer();
     if (currentPlayer) {
       if (currentPlayer.completed) {
