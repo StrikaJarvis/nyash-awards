@@ -103,7 +103,7 @@
       color: var(--text-primary);
     }
     .cookie-consent .cookie-text .more-link {
-      color: #ffd700;
+      color: var(--text-secondary);
       text-decoration: underline;
       cursor: pointer;
       font-weight: 500;
@@ -151,7 +151,7 @@
       justify-content: center;
     }
 
-    /* ===== МОДАЛЬНОЕ ОКНО "ПОДРОБНЕЕ" ===== */
+    /* ===== МОДАЛЬНОЕ ОКНО ===== */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -202,14 +202,12 @@
       transform: rotate(90deg);
     }
     .modal-content h2 {
-      font-size: 1.6rem;
+      font-size: 1.4rem;
       margin-bottom: 16px;
-      color: #ffd700;
-      display: flex;
-      align-items: center;
-      gap: 12px;
+      color: var(--text-primary);
+      font-weight: 600;
+      letter-spacing: 0.3px;
     }
-    .modal-content h2 .icon { font-size: 2rem; }
     .modal-content p {
       color: var(--text-secondary);
       line-height: 1.7;
@@ -226,16 +224,22 @@
       margin: 16px 0;
     }
     .modal-content .check-list li {
-      padding: 8px 0 8px 32px;
+      padding: 8px 0 8px 24px;
       position: relative;
       color: var(--text-secondary);
       border-bottom: 1px solid rgba(255,255,255,0.04);
+      font-size: 0.95rem;
+      line-height: 1.5;
     }
     .modal-content .check-list li::before {
-      content: '✅';
+      content: '';
       position: absolute;
       left: 0;
-      top: 8px;
+      top: 12px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-muted);
     }
     .modal-content .check-list li:last-child { border-bottom: none; }
     .modal-content .btn-modal-close {
@@ -588,11 +592,11 @@
       line-height: 1.8;
     }
     .footer-legal a {
-      color: #ffd700;
-      text-decoration: none;
+      color: var(--text-muted);
+      text-decoration: underline;
       cursor: pointer;
     }
-    .footer-legal a:hover { text-decoration: underline; }
+    .footer-legal a:hover { color: #fff; }
     @media (max-width: 600px) {
       .poll-wrapper { padding: 24px 16px; }
       .header h1 { font-size: 1.5rem; }
@@ -617,7 +621,7 @@
       .cookie-consent .btn-cookie-secondary { width: 100%; justify-content: center; }
       .cookie-consent .cookie-actions { width: 100%; flex-direction: column; }
       .modal-content { padding: 24px 18px; }
-      .modal-content h2 { font-size: 1.3rem; }
+      .modal-content h2 { font-size: 1.2rem; }
     }
   </style>
 </head>
@@ -629,8 +633,8 @@
 <!-- ===== ПЛАШКА СОГЛАСИЯ ===== -->
 <div class="cookie-consent" id="cookieConsent">
   <div class="cookie-text">
-    <strong>🍪 Мы используем файлы cookie и собираем IP-адрес</strong> для защиты от повторного голосования. 
-    Данные не передаются третьим лицам. Продолжая использовать сайт, вы соглашаетесь с этим.
+    <strong>Мы используем файлы cookie и собираем IP-адрес</strong> для защиты от повторного голосования.
+    Данные не передаются третьим лицам.
     <span class="more-link" id="moreDetailsBtn">Подробнее</span>
   </div>
   <div class="cookie-actions">
@@ -639,37 +643,37 @@
   </div>
 </div>
 
-<!-- ===== МОДАЛЬНОЕ ОКНО "ПОДРОБНЕЕ" ===== -->
+<!-- ===== МОДАЛЬНОЕ ОКНО ===== -->
 <div class="modal-overlay" id="privacyModal">
   <div class="modal-content">
     <button class="modal-close" id="modalCloseBtn">✕</button>
-    <h2><span class="icon">🛡️</span> Политика конфиденциальности</h2>
-    
-    <p><span class="highlight">Мы уважаем вашу приватность</span> и хотим, чтобы вы чувствовали себя в безопасности на нашем сайте.</p>
-    
-    <p><span class="highlight">Что мы собираем:</span></p>
+    <h2>Политика конфиденциальности</h2>
+
+    <p>Мы уважаем вашу приватность и хотим, чтобы вы чувствовали себя в безопасности на нашем сайте.</p>
+
+    <p><strong>Что мы собираем:</strong></p>
     <ul class="check-list">
-      <li><strong>IP-адрес</strong> — используется только для защиты от повторного голосования с одного устройства. Мы <strong>не передаём</strong> его третьим лицам.</li>
+      <li><strong>IP-адрес</strong> — используется только для защиты от повторного голосования с одного устройства. Мы не передаём его третьим лицам.</li>
       <li><strong>Файлы cookie</strong> — сохраняют ваше согласие на обработку данных, чтобы плашка не появлялась при каждом визите.</li>
       <li><strong>Ник и ответы</strong> — сохраняются локально в вашем браузере и видны только организаторам голосования.</li>
     </ul>
-    
-    <p><span class="highlight">Что мы НЕ делаем:</span></p>
+
+    <p><strong>Что мы НЕ делаем:</strong></p>
     <ul class="check-list">
-      <li>❌ Не передаём ваш IP-адрес кому-либо.</li>
-      <li>❌ Не используем данные для отслеживания за пределами этого опроса.</li>
-      <li>❌ Не храним данные дольше, чем это необходимо для голосования.</li>
-      <li>❌ Не показываем ваш IP-адрес другим игрокам.</li>
+      <li>Не передаём ваш IP-адрес кому-либо.</li>
+      <li>Не используем данные для отслеживания за пределами этого опроса.</li>
+      <li>Не храним данные дольше, чем это необходимо для голосования.</li>
+      <li>Не показываем ваш IP-адрес другим игрокам.</li>
     </ul>
-    
-    <p><span class="highlight">Как удалить данные:</span><br>
-    Вы всегда можете попросить организаторов удалить ваши данные через <strong>админ-панель</strong> (кнопка «Сброс» рядом с вашим ником).</p>
-    
+
+    <p><strong>Как удалить данные:</strong><br>
+    Вы всегда можете попросить организаторов удалить ваши данные.</p>
+
     <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.04); padding-top: 12px;">
-      📅 Последнее обновление: 29.07.2026
+      Последнее обновление: 29.07.2026
     </p>
-    
-    <button class="btn-modal-close" id="modalCloseBtn2">Понятно, спасибо!</button>
+
+    <button class="btn-modal-close" id="modalCloseBtn2">Понятно</button>
   </div>
 </div>
 
@@ -745,8 +749,8 @@
   </div>
 
   <div class="footer-legal">
-    🔒 IP-адрес и cookie собираются для защиты от повторного голосования. 
-    Данные не передаются третьим лицам. 
+    IP-адрес и cookie собираются для защиты от повторного голосования.
+    Данные не передаются третьим лицам.
     <a id="footerMoreLink">Подробнее о политике конфиденциальности</a>
   </div>
 </div>
@@ -766,33 +770,27 @@
     const modal = document.getElementById('privacyModal');
     const cookieConsent = document.getElementById('cookieConsent');
 
-    // Показываем плашку, если не согласились
     if (consent !== 'accepted') {
       cookieConsent.classList.add('show');
     }
 
-    // Согласие
     document.getElementById('acceptCookieBtn').addEventListener('click', function() {
       localStorage.setItem('nyash_cookie_consent', 'accepted');
       cookieConsent.classList.remove('show');
     });
 
-    // Отклонить (скрываем плашку, но согласие не сохраняем)
     document.getElementById('declineCookieBtn').addEventListener('click', function() {
       cookieConsent.classList.remove('show');
     });
 
-    // Открыть модалку из плашки
     document.getElementById('moreDetailsBtn').addEventListener('click', function() {
       modal.classList.add('show');
     });
 
-    // Открыть модалку из футера
     document.getElementById('footerMoreLink').addEventListener('click', function() {
       modal.classList.add('show');
     });
 
-    // Закрыть модалку (все три способа)
     function closeModal() {
       modal.classList.remove('show');
     }
@@ -801,7 +799,6 @@
     modal.addEventListener('click', function(e) {
       if (e.target === modal) closeModal();
     });
-    // Закрытие по Escape
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && modal.classList.contains('show')) closeModal();
     });
