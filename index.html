@@ -73,7 +73,7 @@
       border: 1px solid var(--border-light);
     }
 
-    /* ===== ПЛАШКА СОГЛАСИЯ НА COOKIE ===== */
+    /* ===== ПЛАШКА СОГЛАСИЯ ===== */
     .cookie-consent {
       position: fixed;
       bottom: 0;
@@ -102,11 +102,13 @@
     .cookie-consent .cookie-text strong {
       color: var(--text-primary);
     }
-    .cookie-consent .cookie-text a {
+    .cookie-consent .cookie-text .more-link {
       color: #ffd700;
       text-decoration: underline;
       cursor: pointer;
+      font-weight: 500;
     }
+    .cookie-consent .cookie-text .more-link:hover { color: #fff; }
     .cookie-consent .btn-cookie {
       background: #fff;
       color: #0a0a0a;
@@ -149,29 +151,109 @@
       justify-content: center;
     }
 
-    @media (max-width: 600px) {
-      .cookie-consent {
-        padding: 16px;
-        flex-direction: column;
-        gap: 14px;
-      }
-      .cookie-consent .cookie-text {
-        font-size: 0.8rem;
-      }
-      .cookie-consent .btn-cookie {
-        padding: 10px 24px;
-        font-size: 0.85rem;
-        width: 100%;
-        justify-content: center;
-      }
-      .cookie-consent .btn-cookie-secondary {
-        width: 100%;
-        justify-content: center;
-      }
-      .cookie-consent .cookie-actions {
-        width: 100%;
-        flex-direction: column;
-      }
+    /* ===== МОДАЛЬНОЕ ОКНО "ПОДРОБНЕЕ" ===== */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 10000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-content {
+      background: #1a1a1f;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 32px 28px;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+      animation: modalIn 0.3s ease;
+    }
+    @keyframes modalIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .modal-content .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.8rem;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+    }
+    .modal-content .modal-close:hover {
+      color: #fff;
+      transform: rotate(90deg);
+    }
+    .modal-content h2 {
+      font-size: 1.6rem;
+      margin-bottom: 16px;
+      color: #ffd700;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .modal-content h2 .icon { font-size: 2rem; }
+    .modal-content p {
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 14px;
+      font-size: 0.95rem;
+    }
+    .modal-content .highlight {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+    .modal-content .check-list {
+      list-style: none;
+      padding: 0;
+      margin: 16px 0;
+    }
+    .modal-content .check-list li {
+      padding: 8px 0 8px 32px;
+      position: relative;
+      color: var(--text-secondary);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .modal-content .check-list li::before {
+      content: '✅';
+      position: absolute;
+      left: 0;
+      top: 8px;
+    }
+    .modal-content .check-list li:last-child { border-bottom: none; }
+    .modal-content .btn-modal-close {
+      background: #fff;
+      color: #0a0a0a;
+      border: none;
+      padding: 12px 36px;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+      margin-top: 8px;
+      width: 100%;
+    }
+    .modal-content .btn-modal-close:hover {
+      background: #e0e0e0;
     }
 
     /* ===== ОСТАЛЬНЫЕ СТИЛИ ===== */
@@ -503,11 +585,12 @@
       text-align: center;
       border-top: 1px solid rgba(255,255,255,0.04);
       padding-top: 14px;
-      line-height: 1.6;
+      line-height: 1.8;
     }
     .footer-legal a {
       color: #ffd700;
       text-decoration: none;
+      cursor: pointer;
     }
     .footer-legal a:hover { text-decoration: underline; }
     @media (max-width: 600px) {
@@ -519,27 +602,78 @@
       .admin-login { flex-direction: column; }
       .final-message h2 { font-size: 1.6rem; }
       .final-message .invite-date { font-size: 1.4rem; }
+      .cookie-consent {
+        padding: 16px;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .cookie-consent .cookie-text { font-size: 0.8rem; }
+      .cookie-consent .btn-cookie {
+        padding: 10px 24px;
+        font-size: 0.85rem;
+        width: 100%;
+        justify-content: center;
+      }
+      .cookie-consent .btn-cookie-secondary { width: 100%; justify-content: center; }
+      .cookie-consent .cookie-actions { width: 100%; flex-direction: column; }
+      .modal-content { padding: 24px 18px; }
+      .modal-content h2 { font-size: 1.3rem; }
     }
   </style>
 </head>
 <body>
 
-<!-- ===== ПЛАШКА СОГЛАСИЯ НА COOKIE/IP ===== -->
+<!-- ===== ЭНДЕР-СТОЛБЫ ===== -->
+<div class="ender-pillars" id="pillarsContainer"></div>
+
+<!-- ===== ПЛАШКА СОГЛАСИЯ ===== -->
 <div class="cookie-consent" id="cookieConsent">
   <div class="cookie-text">
     <strong>🍪 Мы используем файлы cookie и собираем IP-адрес</strong> для защиты от повторного голосования. 
     Данные не передаются третьим лицам. Продолжая использовать сайт, вы соглашаетесь с этим.
-    <a onclick="document.getElementById('cookieConsent').classList.remove('show');" style="cursor:pointer;">Подробнее</a>
+    <span class="more-link" id="moreDetailsBtn">Подробнее</span>
   </div>
   <div class="cookie-actions">
     <button class="btn-cookie" id="acceptCookieBtn">Согласен</button>
-    <button class="btn-cookie-secondary" onclick="document.getElementById('cookieConsent').classList.remove('show');">Отклонить</button>
+    <button class="btn-cookie-secondary" id="declineCookieBtn">Отклонить</button>
+  </div>
+</div>
+
+<!-- ===== МОДАЛЬНОЕ ОКНО "ПОДРОБНЕЕ" ===== -->
+<div class="modal-overlay" id="privacyModal">
+  <div class="modal-content">
+    <button class="modal-close" id="modalCloseBtn">✕</button>
+    <h2><span class="icon">🛡️</span> Политика конфиденциальности</h2>
+    
+    <p><span class="highlight">Мы уважаем вашу приватность</span> и хотим, чтобы вы чувствовали себя в безопасности на нашем сайте.</p>
+    
+    <p><span class="highlight">Что мы собираем:</span></p>
+    <ul class="check-list">
+      <li><strong>IP-адрес</strong> — используется только для защиты от повторного голосования с одного устройства. Мы <strong>не передаём</strong> его третьим лицам.</li>
+      <li><strong>Файлы cookie</strong> — сохраняют ваше согласие на обработку данных, чтобы плашка не появлялась при каждом визите.</li>
+      <li><strong>Ник и ответы</strong> — сохраняются локально в вашем браузере и видны только организаторам голосования.</li>
+    </ul>
+    
+    <p><span class="highlight">Что мы НЕ делаем:</span></p>
+    <ul class="check-list">
+      <li>❌ Не передаём ваш IP-адрес кому-либо.</li>
+      <li>❌ Не используем данные для отслеживания за пределами этого опроса.</li>
+      <li>❌ Не храним данные дольше, чем это необходимо для голосования.</li>
+      <li>❌ Не показываем ваш IP-адрес другим игрокам.</li>
+    </ul>
+    
+    <p><span class="highlight">Как удалить данные:</span><br>
+    Вы всегда можете попросить организаторов удалить ваши данные через <strong>админ-панель</strong> (кнопка «Сброс» рядом с вашим ником).</p>
+    
+    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.04); padding-top: 12px;">
+      📅 Последнее обновление: 29.07.2026
+    </p>
+    
+    <button class="btn-modal-close" id="modalCloseBtn2">Понятно, спасибо!</button>
   </div>
 </div>
 
 <!-- ===== ОСНОВНОЙ КОНТЕНТ ===== -->
-<div class="ender-pillars" id="pillarsContainer"></div>
-
 <div class="poll-wrapper">
   <div class="header">
     <span class="shield">🐾</span>
@@ -612,8 +746,8 @@
 
   <div class="footer-legal">
     🔒 IP-адрес и cookie собираются для защиты от повторного голосования. 
-    Данные не передаются третьим лицам. Вы можете удалить свои данные через админ-панель.
-    <br><a href="#" onclick="document.getElementById('cookieConsent').classList.add('show'); return false;">Настройки cookie</a>
+    Данные не передаются третьим лицам. 
+    <a id="footerMoreLink">Подробнее о политике конфиденциальности</a>
   </div>
 </div>
 
@@ -625,16 +759,51 @@
 
 <script>
   // =============================================================
-  //  COOKIE CONSENT — показываем плашку, если не согласились
+  //  COOKIE CONSENT + МОДАЛЬНОЕ ОКНО
   // =============================================================
   (function initCookieConsent() {
     const consent = localStorage.getItem('nyash_cookie_consent');
+    const modal = document.getElementById('privacyModal');
+    const cookieConsent = document.getElementById('cookieConsent');
+
+    // Показываем плашку, если не согласились
     if (consent !== 'accepted') {
-      document.getElementById('cookieConsent').classList.add('show');
+      cookieConsent.classList.add('show');
     }
+
+    // Согласие
     document.getElementById('acceptCookieBtn').addEventListener('click', function() {
       localStorage.setItem('nyash_cookie_consent', 'accepted');
-      document.getElementById('cookieConsent').classList.remove('show');
+      cookieConsent.classList.remove('show');
+    });
+
+    // Отклонить (скрываем плашку, но согласие не сохраняем)
+    document.getElementById('declineCookieBtn').addEventListener('click', function() {
+      cookieConsent.classList.remove('show');
+    });
+
+    // Открыть модалку из плашки
+    document.getElementById('moreDetailsBtn').addEventListener('click', function() {
+      modal.classList.add('show');
+    });
+
+    // Открыть модалку из футера
+    document.getElementById('footerMoreLink').addEventListener('click', function() {
+      modal.classList.add('show');
+    });
+
+    // Закрыть модалку (все три способа)
+    function closeModal() {
+      modal.classList.remove('show');
+    }
+    document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+    document.getElementById('modalCloseBtn2').addEventListener('click', closeModal);
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) closeModal();
+    });
+    // Закрытие по Escape
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && modal.classList.contains('show')) closeModal();
     });
   })();
 
@@ -654,7 +823,7 @@
   }
 
   // =============================================================
-  //  ОТПРАВКА В TELEGRAM ЧЕРЕЗ CORS-ПРОКСИ
+  //  ОТПРАВКА В TELEGRAM
   // =============================================================
   async function sendToTelegram(playerData) {
     const { nick, ip, answers } = playerData;
@@ -690,7 +859,7 @@
   }
 
   // =============================================================
-  //  ЭНДЕР-СТОЛБЫ — 35 ШТУК ПО ВСЕМУ ФОНУ
+  //  ЭНДЕР-СТОЛБЫ — 35 ШТУК
   // =============================================================
   (function createPillars() {
     const container = document.getElementById('pillarsContainer');
