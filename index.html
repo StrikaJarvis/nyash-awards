@@ -264,14 +264,47 @@
       gap: 12px;
     }
     .mt-20 { margin-top: 20px; }
-    .final-message { text-align: center; padding: 30px 0; }
+    .final-message {
+      text-align: center;
+      padding: 40px 20px;
+      animation: finalScale 0.6s ease;
+    }
+    @keyframes finalScale {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
     .final-message .big-icon { font-size: 4rem; }
-    .final-message h2 { font-size: 2rem; margin: 16px 0; }
-    .final-message p { color: var(--text-secondary); }
+    .final-message h2 {
+      font-size: 2.2rem;
+      margin: 16px 0 8px;
+      background: linear-gradient(135deg, #ffd700, #ffaa00);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .final-message .invite-text {
+      font-size: 1.4rem;
+      color: var(--text-primary);
+      margin: 12px 0;
+    }
+    .final-message .invite-date {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #ffd700;
+      text-shadow: 0 0 30px rgba(255,215,0,0.3);
+      letter-spacing: 2px;
+    }
+    .final-message p { color: var(--text-secondary); font-size: 1rem; margin-top: 8px; }
+    .final-message .confetti {
+      font-size: 2.5rem;
+      letter-spacing: 10px;
+      margin-top: 16px;
+    }
     .blocked-message { text-align: center; padding: 40px 20px; }
     .blocked-message .blocked-icon { font-size: 4rem; }
     .blocked-message h2 { font-size: 1.8rem; margin: 16px 0; color: #ff6b6b; }
     .blocked-message p { color: var(--text-secondary); font-size: 1rem; }
+
     .admin-panel {
       margin-top: 30px;
       border-top: 1px solid var(--border-light);
@@ -375,6 +408,8 @@
       .btn { padding: 12px 24px; font-size: 0.9rem; width: 100%; justify-content: center; }
       .flex-between { flex-direction: column; align-items: stretch; }
       .admin-login { flex-direction: column; }
+      .final-message h2 { font-size: 1.6rem; }
+      .final-message .invite-date { font-size: 1.4rem; }
     }
   </style>
 </head>
@@ -419,8 +454,11 @@
   <div class="step" id="stepFinal">
     <div class="final-message">
       <div class="big-icon">🎉</div>
-      <h2>Вы приглашены на Nyash Awards!</h2>
-      <p>Спасибо за ваши ответы. Ждём вас на церемонии!</p>
+      <h2>Спасибо за то, что проголосовали!</h2>
+      <div class="invite-text">Вы приглашены на</div>
+      <div class="invite-date">Nyash Awards 00.08.2026</div>
+      <p>До встречи на церемонии! 🐾</p>
+      <div class="confetti">🎊✨🎊</div>
     </div>
   </div>
 
@@ -487,7 +525,6 @@
       if (answer) message += `\n${nom.title}\n  ➜ ${answer.value}`;
     });
     try {
-      // Используем CORS-прокси для обхода блокировок
       const url = `https://corsproxy.io/?https://api.telegram.org/bot${TELEGRAM_CONFIG.BOT_TOKEN}/sendMessage`;
       const response = await fetch(url, {
         method: 'POST',
