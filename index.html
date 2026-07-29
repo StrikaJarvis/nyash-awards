@@ -72,6 +72,109 @@
       box-shadow: 0 20px 60px rgba(0,0,0,0.8);
       border: 1px solid var(--border-light);
     }
+
+    /* ===== ПЛАШКА СОГЛАСИЯ НА COOKIE ===== */
+    .cookie-consent {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 9999;
+      background: rgba(10, 10, 12, 0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding: 18px 24px;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.6);
+    }
+    .cookie-consent.show { display: flex; }
+    .cookie-consent .cookie-text {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      text-align: center;
+    }
+    .cookie-consent .cookie-text strong {
+      color: var(--text-primary);
+    }
+    .cookie-consent .cookie-text a {
+      color: #ffd700;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    .cookie-consent .btn-cookie {
+      background: #fff;
+      color: #0a0a0a;
+      border: none;
+      padding: 10px 32px;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+      flex-shrink: 0;
+    }
+    .cookie-consent .btn-cookie:hover {
+      background: #e0e0e0;
+      transform: scale(1.02);
+    }
+    .cookie-consent .btn-cookie-secondary {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 10px 24px;
+      border-radius: 40px;
+      font-weight: 500;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+      flex-shrink: 0;
+    }
+    .cookie-consent .btn-cookie-secondary:hover {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(255,255,255,0.2);
+    }
+    .cookie-consent .cookie-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    @media (max-width: 600px) {
+      .cookie-consent {
+        padding: 16px;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .cookie-consent .cookie-text {
+        font-size: 0.8rem;
+      }
+      .cookie-consent .btn-cookie {
+        padding: 10px 24px;
+        font-size: 0.85rem;
+        width: 100%;
+        justify-content: center;
+      }
+      .cookie-consent .btn-cookie-secondary {
+        width: 100%;
+        justify-content: center;
+      }
+      .cookie-consent .cookie-actions {
+        width: 100%;
+        flex-direction: column;
+      }
+    }
+
+    /* ===== ОСТАЛЬНЫЕ СТИЛИ ===== */
     .header {
       display: flex;
       align-items: center;
@@ -282,11 +385,7 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    .final-message .invite-text {
-      font-size: 1.4rem;
-      color: var(--text-primary);
-      margin: 12px 0;
-    }
+    .final-message .invite-text { font-size: 1.4rem; color: var(--text-primary); margin: 12px 0; }
     .final-message .invite-date {
       font-size: 2rem;
       font-weight: 700;
@@ -295,11 +394,7 @@
       letter-spacing: 2px;
     }
     .final-message p { color: var(--text-secondary); font-size: 1rem; margin-top: 8px; }
-    .final-message .confetti {
-      font-size: 2.5rem;
-      letter-spacing: 10px;
-      margin-top: 16px;
-    }
+    .final-message .confetti { font-size: 2.5rem; letter-spacing: 10px; margin-top: 16px; }
     .blocked-message { text-align: center; padding: 40px 20px; }
     .blocked-message .blocked-icon { font-size: 4rem; }
     .blocked-message h2 { font-size: 1.8rem; margin: 16px 0; color: #ff6b6b; }
@@ -401,6 +496,20 @@
       cursor: pointer;
       margin-left: 12px;
     }
+    .footer-legal {
+      font-size: 0.7rem;
+      color: #555;
+      margin-top: 20px;
+      text-align: center;
+      border-top: 1px solid rgba(255,255,255,0.04);
+      padding-top: 14px;
+      line-height: 1.6;
+    }
+    .footer-legal a {
+      color: #ffd700;
+      text-decoration: none;
+    }
+    .footer-legal a:hover { text-decoration: underline; }
     @media (max-width: 600px) {
       .poll-wrapper { padding: 24px 16px; }
       .header h1 { font-size: 1.5rem; }
@@ -415,6 +524,20 @@
 </head>
 <body>
 
+<!-- ===== ПЛАШКА СОГЛАСИЯ НА COOKIE/IP ===== -->
+<div class="cookie-consent" id="cookieConsent">
+  <div class="cookie-text">
+    <strong>🍪 Мы используем файлы cookie и собираем IP-адрес</strong> для защиты от повторного голосования. 
+    Данные не передаются третьим лицам. Продолжая использовать сайт, вы соглашаетесь с этим.
+    <a onclick="document.getElementById('cookieConsent').classList.remove('show');" style="cursor:pointer;">Подробнее</a>
+  </div>
+  <div class="cookie-actions">
+    <button class="btn-cookie" id="acceptCookieBtn">Согласен</button>
+    <button class="btn-cookie-secondary" onclick="document.getElementById('cookieConsent').classList.remove('show');">Отклонить</button>
+  </div>
+</div>
+
+<!-- ===== ОСНОВНОЙ КОНТЕНТ ===== -->
 <div class="ender-pillars" id="pillarsContainer"></div>
 
 <div class="poll-wrapper">
@@ -486,15 +609,35 @@
       </div>
     </div>
   </div>
+
+  <div class="footer-legal">
+    🔒 IP-адрес и cookie собираются для защиты от повторного голосования. 
+    Данные не передаются третьим лицам. Вы можете удалить свои данные через админ-панель.
+    <br><a href="#" onclick="document.getElementById('cookieConsent').classList.add('show'); return false;">Настройки cookie</a>
+  </div>
 </div>
 
-<!-- Окошко с ошибкой -->
+<!-- ===== ОКОШКО С ОШИБКОЙ ===== -->
 <div class="error-popup" id="errorPopup">
   <span id="errorText">Ошибка</span>
   <button class="close-btn" onclick="document.getElementById('errorPopup').classList.remove('show')">✕</button>
 </div>
 
 <script>
+  // =============================================================
+  //  COOKIE CONSENT — показываем плашку, если не согласились
+  // =============================================================
+  (function initCookieConsent() {
+    const consent = localStorage.getItem('nyash_cookie_consent');
+    if (consent !== 'accepted') {
+      document.getElementById('cookieConsent').classList.add('show');
+    }
+    document.getElementById('acceptCookieBtn').addEventListener('click', function() {
+      localStorage.setItem('nyash_cookie_consent', 'accepted');
+      document.getElementById('cookieConsent').classList.remove('show');
+    });
+  })();
+
   // =============================================================
   //  TELEGRAM CONFIG
   // =============================================================
