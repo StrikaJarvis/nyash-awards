@@ -59,8 +59,6 @@
       0% { opacity: 0.25; filter: brightness(0.5); }
       100% { opacity: 0.9; filter: brightness(1.3); }
     }
-
-    /* ===== ОСНОВНОЙ БЛОК ===== */
     .poll-wrapper {
       position: relative;
       z-index: 1;
@@ -262,7 +260,6 @@
       background: #e0e0e0;
     }
 
-    /* ===== ОСТАЛЬНЫЕ СТИЛИ ===== */
     .header {
       display: flex;
       align-items: center;
@@ -650,16 +647,13 @@
   <div class="modal-content">
     <button class="modal-close" id="modalCloseBtn">✕</button>
     <h2>Политика конфиденциальности</h2>
-
     <p>Мы уважаем вашу приватность и хотим, чтобы вы чувствовали себя в безопасности на нашем сайте.</p>
-
     <p><strong>Что мы собираем:</strong></p>
     <ul class="check-list">
       <li><strong>IP-адрес</strong> — используется только для защиты от повторного голосования с одного устройства. Мы не передаём его третьим лицам.</li>
       <li><strong>Файлы cookie</strong> — сохраняют ваше согласие на обработку данных, чтобы плашка не появлялась при каждом визите.</li>
       <li><strong>Ник и ответы</strong> — сохраняются локально в вашем браузере и видны только организаторам голосования.</li>
     </ul>
-
     <p><strong>Что мы НЕ делаем:</strong></p>
     <ul class="check-list">
       <li>Не передаём ваш IP-адрес кому-либо.</li>
@@ -667,14 +661,11 @@
       <li>Не храним данные дольше, чем это необходимо для голосования.</li>
       <li>Не показываем ваш IP-адрес другим игрокам.</li>
     </ul>
-
     <p><strong>Как удалить данные:</strong><br>
     Вы всегда можете попросить организаторов удалить ваши данные.</p>
-
     <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.04); padding-top: 12px;">
-      Последнее обновление: 29.07.2026
+      Последнее обновление: 30.07.2026
     </p>
-
     <button class="btn-modal-close" id="modalCloseBtn2">Понятно</button>
   </div>
 </div>
@@ -772,7 +763,6 @@
     const modal = document.getElementById('privacyModal');
     const cookieConsent = document.getElementById('cookieConsent');
 
-    // Показываем плашку, если согласия нет
     if (consent !== 'accepted') {
       cookieConsent.classList.add('show');
     }
@@ -823,7 +813,7 @@
   }
 
   // =============================================================
-  //  ОТПРАВКА В TELEGRAM
+  //  ОТПРАВКА В TELEGRAM (C ОБНОВЛЁННЫМ ПРОКСИ)
   // =============================================================
   async function sendToTelegram(playerData) {
     const { nick, ip, answers } = playerData;
@@ -837,7 +827,8 @@
       if (answer) message += `\n${nom.title}\n  ➜ ${answer.value}`;
     });
     try {
-      const url = `https://corsproxy.io/?https://api.telegram.org/bot${TELEGRAM_CONFIG.BOT_TOKEN}/sendMessage`;
+      // ИСПОЛЬЗУЕМ НОВЫЙ ПРОКСИ — api.allorigins.win
+      const url = `https://api.allorigins.win/raw?url=https://api.telegram.org/bot${TELEGRAM_CONFIG.BOT_TOKEN}/sendMessage`;
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
