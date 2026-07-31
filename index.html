@@ -522,37 +522,74 @@
 
 <script>
   // =============================================================
-  //  GOOGLE SHEETS — ТВОЙ URL
+  //  ЗАЩИТА ОТ ПРОСМОТРА ИСХОДНОГО КОДА
   // =============================================================
-  const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzvTeId9tfUtVWjVYTsnCr_6uQmnuj8sW-oZLK4BEgcN3J1XqHvGl9JdcuTubA5NQ19/exec';
+  (function() {
+    // Анти-DevTools: определение открытой консоли
+    var _detect = false;
+    var _el = new Image();
+    Object.defineProperty(_el, 'id', { get: function() { _detect = true; } });
+    setInterval(function() {
+      _detect = false;
+      console.log(_el);
+      if (_detect) {
+        // Консоль открыта — перенаправляем или блокируем
+        document.body.innerHTML = '<div style="color:#fff;text-align:center;padding:100px;font-family:sans-serif;"><h1>🚫 Доступ запрещён</h1><p>Пожалуйста, закройте инструменты разработчика.</p></div>';
+      }
+    }, 1000);
+
+    // Запрет правой кнопки мыши (View Source / Inspect Element)
+    document.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+      return false;
+    });
+
+    // Запрет Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U, F12
+    document.addEventListener('keydown', function(e) {
+      if (
+        e.key === 'F12' ||
+        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+        (e.ctrlKey && e.key === 'U') ||
+        (e.ctrlKey && e.shiftKey && e.key === 'K')
+      ) {
+        e.preventDefault();
+        return false;
+      }
+    });
+  })();
+
+  // Декодер Base64
+  function _d(b64) {
+    try {
+      return decodeURIComponent(atob(b64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+    } catch(e) { return atob(b64); }
+  }
+
+  // Хеш-функция SHA-256 (лёгкая — для проверки пароля без внешних библиотек)
+  async function _sha256(msg) {
+    var enc = new TextEncoder();
+    var data = enc.encode(msg);
+    var hash = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(hash)).map(function(b) { return b.toString(16).padStart(2,'0'); }).join('');
+  }
 
   // =============================================================
-  //  ВСЕ НИКИ (21 ИГРОК)
+  //  ЗАЩИЩЁННЫЕ ДАННЫЕ (Base64)
   // =============================================================
-  const ALL_NICKS = [
-    'Strika_Jarvis', 'Gate_ton', 'Tigr65789', 'meshokdeneg',
-    'AppleTob', 'roma_1917', 'blebik❤️', 'Lord15986', 'Mayorcraft',
-    'nevertajm', 'tomatoma', 'Stalker', 'Diller',
-    'GG_Chaika', 'meshokRoma', 'Piska_mamonta',
-    'kirill_hag', 'son1k', 'sato77', 'BATISTA4554', 'Salo'
-  ];
+  var _U = 'aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J6dlRlSWQ5dGZVdFZXalZZVHNuQ3JfNnVRbW51ajhzVy1vWkxLNEJFZ2NOM0oxWHFIdkdsOUpkY3VUdWJBNU5RMTkvZXhlYw==';
+  var _N = 'WyJTdHJpa2FfSmFydmlzIiwgIkdhdGVfdG9uIiwgIlRpZ3I2NTc4OSIsICJtZXNob2tkZW5lZyIsICJBcHBsZVRvYiIsICJyb21hXzE5MTciLCAiYmxlYmlrXHUyNzY0XHVmZTBmIiwgIkxvcmQxNTk4NiIsICJNYXlvcmNyYWZ0IiwgIm5ldmVydGFqbSIsICJ0b21hdG9tYSIsICJTdGFsa2VyIiwgIkRpbGxlciIsICJHR19DaGFpa2EiLCAibWVzaG9rUm9tYSIsICJQaXNrYV9tYW1vbnRhIiwgImtpcmlsbF9oYWciLCAic29uMWsiLCAic2F0bzc3IiwgIkJBVElTVEE0NTU0IiwgIlNhbG8iXQ==';
+  var _T = 'eyJiZXN0X3BsYXllciI6IFsiTWF5b3JjcmFmdCIsICJtZXNob2tkZW5lZyIsICJibGViaWvinaTvuI8iLCAiR2F0ZV90b24iXSwgImJlc3RfYnVpbGRlciI6IFsibWVzaG9rZGVuZWciLCAiU3RyaWthX0phcnZpcyIsICJNYXlvcmNyYWZ0IiwgIkdhdGVfdG9uIl0sICJiZXN0X3B2cCI6IFsiYmxlYmlr4p2k77iPIiwgIkdhdGVfdG9uIiwgIk1heW9yY3JhZnQiLCAibWVzaG9rUm9tYSJdLCAiYmVzdF9hZG1pbiI6IFsiQXBwbGVUb2IiLCAibWVzaG9rZGVuZWciLCAiTWF5b3JjcmFmdCIsICJTdHJpa2FfSmFydmlzIl0sICJiZXN0X3B2ZSI6IFsiYmxlYmlr4p2k77iPIiwgIkdhdGVfdG9uIiwgIlN0YWxrZXIiLCAidG9tYXRvbWEiXSwgImJlc3Rfbm9vYiI6IFsidG9tYXRvbWEiLCAiU3RhbGtlciIsICJQaXNrYV9tYW1vbnRhIiwgIkdHX0NoYWlrYSJdLCAiYmVzdF9mYXJtaW5nIjogWyJHYXRlX3RvbiIsICJ0b21hdG9tYSIsICJTdGFsa2VyIiwgIm1lc2hva2RlbmVnIl0sICJiZXN0X3JlZHN0b25lIjogWyJtZXNob2tkZW5lZyIsICJTdHJpa2FfSmFydmlzIiwgIk1heW9yY3JhZnQiLCAiR2F0ZV90b24iXSwgImJlc3RfZ3VpbGRtYXN0ZXIiOiBbIm1lc2hva2RlbmVnIiwgIk1heW9yY3JhZnQiLCAiTG9yZDE1OTg2IiwgIkdhdGVfdG9uIl0sICJiZXN0X2FjdGl2ZSI6IFsiYmxlYmlr4p2k77iPIiwgIm1lc2hva2RlbmVnIiwgIlN0cmlrYV9KYXJ2aXMiLCAiR2F0ZV90b24iXSwgImJlc3RfdHJvbGwiOiBbIkdhdGVfdG9uIiwgIm1lc2hva2RlbmVnIiwgIkFwcGxlVG9iIiwgIk1heW9yY3JhZnQiXX0=';
+  var _R = 'aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL1N0cmlrYUphcnZpcy9ueWFzaC1hd2FyZHMvbWFpbi9yZXN1bHRzLmpzb24=';
+  var _P = '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9'; // SHA-256 хеш пароля
 
-  // =============================================================
-  //  ГЛАВНЫЕ ПРЕТЕНДЕНТЫ
-  // =============================================================
-  const TOP_CANDIDATES = {
-    best_player: ['Mayorcraft', 'meshokdeneg', 'blebik❤️', 'Gate_ton'],
-    best_builder: ['meshokdeneg', 'Strika_Jarvis', 'Mayorcraft', 'Gate_ton'],
-    best_pvp: ['blebik❤️', 'Gate_ton', 'Mayorcraft', 'meshokRoma'],
-    best_admin: ['AppleTob', 'meshokdeneg', 'Mayorcraft', 'Strika_Jarvis'],
-    best_pve: ['blebik❤️', 'Gate_ton', 'Stalker', 'tomatoma'],
-    best_noob: ['tomatoma', 'Stalker', 'Piska_mamonta', 'GG_Chaika'],
-    best_farming: ['Gate_ton', 'tomatoma', 'Stalker', 'meshokdeneg'],
-    best_redstone: ['meshokdeneg', 'Strika_Jarvis', 'Mayorcraft', 'Gate_ton'],
-    best_guildmaster: ['meshokdeneg', 'Mayorcraft', 'Lord15986', 'Gate_ton'],
-    best_active: ['blebik❤️', 'meshokdeneg', 'Strika_Jarvis', 'Gate_ton'],
-    best_troll: ['Gate_ton', 'meshokdeneg', 'AppleTob', 'Mayorcraft']
-  };
+  // Деобфусцированные значения
+  var GOOGLE_SHEETS_URL = _d(_U);
+  var ALL_NICKS = JSON.parse(_d(_N));
+  var TOP_CANDIDATES = JSON.parse(_d(_T));
+  var RESULTS_JSON_URL = _d(_R);
+  var ADMIN_PASSWORD_HASH = _P;
 
   // =============================================================
   //  15 НОМИНАЦИЙ
@@ -900,8 +937,6 @@
   let allPlayers = [];
   let allIPs = [];
 
-  const RESULTS_JSON_URL = 'https://raw.githubusercontent.com/StrikaJarvis/nyash-awards/main/results.json';
-
   function loadAllPlayers() {
     try { allPlayers = JSON.parse(localStorage.getItem('nyash_all_players')) || []; } catch(e) { allPlayers = []; }
   }
@@ -1047,7 +1082,9 @@
   });
 
   $('adminLoginBtn').addEventListener('click', async function() {
-    if ($('adminPassword').value.trim() === 'admin123') {
+    var pwd = $('adminPassword').value.trim();
+    var hash = await _sha256(pwd);
+    if (hash === ADMIN_PASSWORD_HASH) {
       adminLoggedIn = true;
       $('adminLogin').style.display = 'none';
       $('adminDashboard').classList.add('active');
