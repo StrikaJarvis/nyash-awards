@@ -457,6 +457,7 @@
     best_pvp: ['blebik❤️', 'Gate_ton', 'Mayorcraft', 'meshokRoma'],
     best_admin: ['AppleTob', 'meshokdeneg', 'Mayorcraft', 'Strika_Jarvis'],
     best_pve: ['blebik❤️', 'Gate_ton', 'Stalker', 'tomatoma'],
+    best_noob: ['tomatoma', 'Stalker', 'Piska_mamonta', 'GG_Chaika'],
     best_farming: ['Gate_ton', 'tomatoma', 'Stalker', 'meshokdeneg'],
     best_redstone: ['meshokdeneg', 'Strika_Jarvis', 'Mayorcraft', 'Gate_ton'],
     best_guildmaster: ['meshokdeneg', 'Mayorcraft', 'Lord15986', 'Gate_ton'],
@@ -465,7 +466,7 @@
   };
 
   // =============================================================
-  //  15 НОМИНАЦИЙ
+  //  15 НОМИНАЦИЙ (best_noob теперь type: 'nick')
   // =============================================================
   const NOMINATIONS = [
     { id: 'best_player', title: '🏅 Лучший игрок сезона', subtitle: 'Кто показал наилучшую игру?', type: 'nick' },
@@ -485,12 +486,7 @@
     ]},
     { id: 'best_admin', title: '🛡️ Лучший администратор', subtitle: 'Кто внёс наибольший вклад в порядок?', type: 'nick' },
     { id: 'best_pve', title: '🧟 Лучший PvE-игрок', subtitle: 'Кто покорял данжи и боссов?', type: 'nick' },
-    { id: 'best_noob', title: '🌱 Лучший новичок', subtitle: 'Кто быстро вырос и впечатлил?', type: 'test', candidates: [
-      'tomatoma',
-      'Stalker',
-      'Piska_mamonta',
-      'GG_Chaika'
-    ]},
+    { id: 'best_noob', title: '🌱 Лучший новичок', subtitle: 'Кто быстро вырос и впечатлил?', type: 'nick' },  // ← ИСПРАВЛЕНО!
     { id: 'best_project', title: '📐 Лучший проект', subtitle: 'Какое коллективное творение достойно награды?', type: 'test', candidates: [
       'данж Анатолия',
       'база админов (с ядерной бомбой)',
@@ -566,7 +562,7 @@
   }
 
   // =============================================================
-  //  ОТРИСОВКА ОПРОСА (С ГЛАВНЫМИ ПРЕТЕНДЕНТАМИ)
+  //  ОТРИСОВКА ОПРОСА
   // =============================================================
   function renderSurvey() {
     let html = '';
@@ -617,7 +613,7 @@
       });
     });
 
-    // СОБЫТИЯ ДЛЯ АВТОДОПОЛНЕНИЯ (С ГЛАВНЫМИ ПРЕТЕНДЕНТАМИ)
+    // СОБЫТИЯ ДЛЯ АВТОДОПОЛНЕНИЯ
     document.querySelectorAll('.nick-input').forEach(input => {
       const id = input.dataset.id;
       const dropdown = document.querySelector(`.autocomplete-dropdown[data-id="${id}"]`);
@@ -652,7 +648,7 @@
     });
   }
 
-  // ПОКАЗЫВАЕМ ГЛАВНЫХ ПРЕТЕНДЕНТОВ (при пустом поле)
+  // ПОКАЗЫВАЕМ ГЛАВНЫХ ПРЕТЕНДЕНТОВ
   function showTopCandidates(dropdown, id) {
     dropdown.innerHTML = '';
     const top = TOP_CANDIDATES[id] || [];
@@ -678,7 +674,7 @@
     dropdown.classList.add('active');
   }
 
-  // ОБЫЧНЫЙ ПОИСК (при вводе текста)
+  // ОБЫЧНЫЙ ПОИСК
   function showAutocomplete(input, dropdown, id) {
     const val = input.value.toLowerCase().trim();
     dropdown.innerHTML = '';
@@ -763,7 +759,6 @@
     nickError.textContent = '';
     userIP = await getIP();
 
-    // Проверяем IP
     const stored = localStorage.getItem('nyash_voted_ips') || '[]';
     const votedIPs = JSON.parse(stored);
     if (votedIPs.includes(userIP)) {
@@ -785,13 +780,11 @@
       return;
     }
 
-    // Сохраняем IP
     const stored = localStorage.getItem('nyash_voted_ips') || '[]';
     const votedIPs = JSON.parse(stored);
     votedIPs.push(userIP);
     localStorage.setItem('nyash_voted_ips', JSON.stringify(votedIPs));
 
-    // Сохраняем в Google Sheets
     await saveToGoogleSheets(currentPlayer);
 
     stepSurvey.classList.remove('active');
