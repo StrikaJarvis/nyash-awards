@@ -900,6 +900,8 @@
   let allPlayers = [];
   let allIPs = [];
 
+  const RESULTS_JSON_URL = 'https://raw.githubusercontent.com/StrikaJarvis/nyash-awards/main/results.json';
+
   function loadAllPlayers() {
     try { allPlayers = JSON.parse(localStorage.getItem('nyash_all_players')) || []; } catch(e) { allPlayers = []; }
   }
@@ -908,6 +910,42 @@
     try { allIPs = JSON.parse(localStorage.getItem('nyash_all_ips')) || []; } catch(e) { allIPs = []; }
   }
   function saveAllIPs() { localStorage.setItem('nyash_all_ips', JSON.stringify(allIPs)); }
+
+  // Загрузка ответов всех игроков из results.json (публичный raw URL GitHub)
+  async function loadFromJSON() {
+    try {
+      const resp = await fetch(RESULTS_JSON_URL + '?t=' + Date.now());
+      const json = await resp.json();
+      if (json.players && json.players.length > 0) {
+        // Объединяем с localStorage: JSON — основной источник, но не теряем локальных игроков
+        const localPlayers = JSON.parse(localStorage.getItem('nyash_all_players') || '[]');
+        const mergedNicks = new Set();
+
+        const merged = [];
+
+        // Сначала добавляем всех из JSON
+        json.players.forEach(function(p) {
+          merged.push(p);
+          mergedNicks.add(p.nick);
+        });
+
+        // Добавляем локальных, которых нет в JSON
+        localPlayers.forEach(function(p) {
+          if (!mergedNicks.has(p.nick)) {
+            merged.push(p);
+            mergedNicks.add(p.nick);
+          }
+        });
+
+        allPlayers = merged;
+        return true;
+      }
+      return false;
+    } catch(e) {
+      console.warn('Не удалось загрузить results.json, используем localStorage');
+      return false;
+    }
+  }
 
   function deletePlayer(nick) {
     if (!confirm('Удалить игрока ' + nick + '?')) return;
@@ -1009,14 +1047,25 @@
     }
   });
 
-  $('adminLoginBtn').addEventListener('click', function() {
+  $('adminLoginBtn').addEventListener('click', async function() {
     if ($('adminPassword').value.trim() === 'admin123') {
       adminLoggedIn = true;
       $('adminLogin').style.display = 'none';
       $('adminDashboard').classList.add('active');
       $('adminLoginError').textContent = '';
+
+      // Сначала загружаем из localStorage
       loadAllPlayers();
       loadAllIPs();
+
+      // Затем пытаемся загрузить из results.json (объединяется с localStorage)
+      const loadedFromJSON = await loadFromJSON();
+      if (loadedFromJSON) {
+        console.log('📥 Загружены данные из results.json');
+      } else {
+        console.log('📦 Используются данные из localStorage');
+      }
+
       renderAdminTable();
       renderVotedIPsList();
     } else {
