@@ -196,7 +196,9 @@
       color: #ffd700;
       font-weight: 600;
     }
-    .autocomplete-item.top-candidate::before { content: '⭐ '; }
+    .autocomplete-item.top-candidate::before {
+      content: '⭐ ';
+    }
 
     .candidate-options {
       display: flex;
@@ -564,7 +566,7 @@
   }
 
   // =============================================================
-  //  ОТРИСОВКА ОПРОСА
+  //  ОТРИСОВКА ОПРОСА (С ГЛАВНЫМИ ПРЕТЕНДЕНТАМИ)
   // =============================================================
   function renderSurvey() {
     let html = '';
@@ -615,24 +617,26 @@
       });
     });
 
-    // СОБЫТИЯ ДЛЯ АВТОДОПОЛНЕНИЯ
+    // СОБЫТИЯ ДЛЯ АВТОДОПОЛНЕНИЯ (С ГЛАВНЫМИ ПРЕТЕНДЕНТАМИ)
     document.querySelectorAll('.nick-input').forEach(input => {
       const id = input.dataset.id;
       const dropdown = document.querySelector(`.autocomplete-dropdown[data-id="${id}"]`);
+
+      // При фокусе — показываем главных претендентов
+      input.addEventListener('focus', function() {
+        showTopCandidates(dropdown, id);
+      });
 
       input.addEventListener('input', function() {
         const val = this.value.trim();
         if (val) {
           currentPlayer.answers[id] = { type: 'nick', value: val };
+          showAutocomplete(this, dropdown, id);
         } else {
           delete currentPlayer.answers[id];
+          showTopCandidates(dropdown, id);
         }
         updateStatus();
-        showAutocomplete(this, dropdown, id);
-      });
-
-      input.addEventListener('focus', function() {
-        showAutocomplete(this, dropdown, id);
       });
 
       input.addEventListener('blur', function() {
@@ -648,6 +652,33 @@
     });
   }
 
+  // ПОКАЗЫВАЕМ ГЛАВНЫХ ПРЕТЕНДЕНТОВ (при пустом поле)
+  function showTopCandidates(dropdown, id) {
+    dropdown.innerHTML = '';
+    const top = TOP_CANDIDATES[id] || [];
+    if (top.length === 0) {
+      dropdown.classList.remove('active');
+      return;
+    }
+
+    top.forEach(nick => {
+      const div = document.createElement('div');
+      div.className = 'autocomplete-item top-candidate';
+      div.textContent = nick;
+      div.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        const input = document.querySelector(`.nick-input[data-id="${id}"]`);
+        input.value = nick;
+        currentPlayer.answers[id] = { type: 'nick', value: nick };
+        updateStatus();
+        dropdown.classList.remove('active');
+      });
+      dropdown.appendChild(div);
+    });
+    dropdown.classList.add('active');
+  }
+
+  // ОБЫЧНЫЙ ПОИСК (при вводе текста)
   function showAutocomplete(input, dropdown, id) {
     const val = input.value.toLowerCase().trim();
     dropdown.innerHTML = '';
@@ -869,7 +900,7 @@
   //  ИНИЦИАЛИЗАЦИЯ
   // =============================================================
   document.addEventListener('DOMContentLoaded', function() {
-    // Никто не голосовал
+    // Всё готово
   });
 </script>
 </body>
