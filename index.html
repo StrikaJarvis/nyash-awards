@@ -856,32 +856,41 @@
     renderSurvey();
   });
 
+  let submitting = false;
+
   submitBtn.addEventListener('click', async function() {
+    if (submitting) return;
     const allAnswered = NOMINATIONS.every(function(nom) { return currentPlayer.answers[nom.id]; });
     if (!allAnswered) {
       alert('Ответьте на все вопросы!');
       return;
     }
 
-    const stored = localStorage.getItem('nyash_voted_ips') || '[]';
-    const votedIPs = JSON.parse(stored);
-    votedIPs.push(userIP);
-    localStorage.setItem('nyash_voted_ips', JSON.stringify(votedIPs));
+    submitting = true;
+    submitBtn.disabled = true;
 
-    await saveToGoogleSheets(currentPlayer);
+    try {
+      const stored = localStorage.getItem('nyash_voted_ips') || '[]';
+      const votedIPs = JSON.parse(stored);
+      votedIPs.push(userIP);
+      localStorage.setItem('nyash_voted_ips', JSON.stringify(votedIPs));
 
-    // Сохраняем в localStorage для админ-панели
-    loadAllPlayers();
-    allPlayers.push({
-      nick: currentPlayer.nick,
-      ip: userIP,
-      date: new Date().toISOString(),
-      answers: currentPlayer.answers
-    });
-    saveAllPlayers();
+      await saveToGoogleSheets(currentPlayer);
 
-    stepSurvey.classList.remove('active');
-    stepFinal.classList.add('active');
+      loadAllPlayers();
+      allPlayers.push({
+        nick: currentPlayer.nick,
+        ip: userIP,
+        date: new Date().toISOString(),
+        answers: currentPlayer.answers
+      });
+      saveAllPlayers();
+
+      stepSurvey.classList.remove('active');
+      stepFinal.classList.add('active');
+    } finally {
+      submitting = false;
+    }
   });
 
   // =============================================================
