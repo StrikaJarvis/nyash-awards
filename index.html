@@ -350,6 +350,81 @@
 
     .nick-with-tooltip { cursor: help; border-bottom: 1px dashed rgba(255,255,255,0.3); }
 
+    /* Модальное окно для просмотра ответов */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.75);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: #16161c;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 32px;
+      max-width: 700px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+      animation: fadeIn 0.3s ease;
+    }
+    .modal h2 {
+      font-size: 1.4rem;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .modal .answer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      gap: 16px;
+    }
+    .modal .answer-row:last-child { border-bottom: none; }
+    .modal .answer-nom { color: var(--text-secondary); font-size: 0.9rem; flex-shrink: 0; min-width: 200px; }
+    .modal .answer-val { color: #fff; font-weight: 500; font-size: 0.95rem; text-align: right; word-break: break-word; }
+    .modal .answer-val.top { color: #ffd700; }
+    .modal-close {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 28px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--border-light);
+      color: #fff;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: var(--transition);
+    }
+    .modal-close:hover { background: rgba(255,255,255,0.14); }
+
+    .btn-answers {
+      background: rgba(100,149,237,0.2);
+      color: #87cefa;
+      border: 1px solid rgba(135,206,250,0.25);
+      padding: 5px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+    .btn-answers:hover { background: rgba(135,206,250,0.15); border-color: rgba(135,206,250,0.5); }
+
     @media (max-width: 600px) {
       .poll-wrapper { padding: 24px 16px; }
       .header h1 { font-size: 1.5rem; }
@@ -357,6 +432,10 @@
       .btn { padding: 12px 24px; font-size: 0.9rem; width: 100%; justify-content: center; }
       .flex-between { flex-direction: column; align-items: stretch; }
       .admin-login { flex-direction: column; }
+      .modal { padding: 20px; }
+      .modal .answer-row { flex-direction: column; gap: 4px; }
+      .modal .answer-nom { min-width: auto; }
+      .modal .answer-val { text-align: left; }
     }
   </style>
 </head>
@@ -418,7 +497,7 @@
         <h3>📋 Список участников</h3>
         <div class="admin-table-wrap">
           <table>
-            <thead><tr><th>Ник</th><th>IP</th><th>Управление</th></tr></thead>
+            <thead><tr><th>Ник</th><th>IP</th><th>Ответы</th><th>Управление</th></tr></thead>
             <tbody id="adminTableBody"></tbody>
           </table>
         </div>
@@ -429,6 +508,11 @@
       </div>
     </div>
   </div>
+</div>
+
+<!-- Модальное окно для просмотра ответов игрока -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalContent"></div>
 </div>
 
 <script>
@@ -486,7 +570,7 @@
     ]},
     { id: 'best_admin', title: '🛡️ Лучший администратор', subtitle: 'Кто внёс наибольший вклад в порядок?', type: 'nick' },
     { id: 'best_pve', title: '🧟 Лучший PvE-игрок', subtitle: 'Кто покорял данжи и боссов?', type: 'nick' },
-    { id: 'best_noob', title: '🌱 Лучший новичок', subtitle: 'Кто быстро вырос и впечатлил?', type: 'nick' },  // ← ИСПРАВЛЕНО!
+    { id: 'best_noob', title: '🌱 Лучший новичок', subtitle: 'Кто быстро вырос и впечатлил?', type: 'nick' },
     { id: 'best_project', title: '📐 Лучший проект', subtitle: 'Какое коллективное творение достойно награды?', type: 'test', candidates: [
       'данж Анатолия',
       'база админов (с ядерной бомбой)',
@@ -618,7 +702,6 @@
       const id = input.dataset.id;
       const dropdown = document.querySelector(`.autocomplete-dropdown[data-id="${id}"]`);
 
-      // При фокусе — показываем главных претендентов
       input.addEventListener('focus', function() {
         showTopCandidates(dropdown, id);
       });
@@ -787,6 +870,16 @@
 
     await saveToGoogleSheets(currentPlayer);
 
+    // Сохраняем в localStorage для админ-панели
+    loadAllPlayers();
+    allPlayers.push({
+      nick: currentPlayer.nick,
+      ip: userIP,
+      date: new Date().toISOString(),
+      answers: currentPlayer.answers
+    });
+    saveAllPlayers();
+
     stepSurvey.classList.remove('active');
     stepFinal.classList.add('active');
   });
@@ -817,22 +910,69 @@
     allPlayers = allPlayers.filter(p => p.nick !== nick);
     saveAllPlayers();
     renderAdminTable();
-    alert(`${nick} удалён!`);
   }
+
+  // Просмотр ответов игрока в модальном окне
+  function viewPlayerAnswers(nick) {
+    loadAllPlayers();
+    const player = allPlayers.find(p => p.nick === nick);
+    if (!player || !player.answers) {
+      alert('Нет данных об ответах этого игрока.');
+      return;
+    }
+
+    const modal = $('modalContent');
+    const overlay = $('modalOverlay');
+
+    let html = `<h2>📋 Ответы игрока: ${player.nick}</h2>`;
+    html += `<p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:16px;">IP: ${player.ip || 'неизвестно'} · ${new Date(player.date).toLocaleString('ru-RU')}</p>`;
+
+    NOMINATIONS.forEach(nom => {
+      const ans = player.answers[nom.id];
+      const value = ans ? ans.value : '—';
+      html += `<div class="answer-row">`;
+      html += `<span class="answer-nom">${nom.title}</span>`;
+      html += `<span class="answer-val${ans ? '' : ''}">${value}</span>`;
+      html += `</div>`;
+    });
+
+    html += `<button class="modal-close" onclick="closeModal()">Закрыть</button>`;
+    modal.innerHTML = html;
+    overlay.classList.add('active');
+  }
+
+  function closeModal() {
+    $('modalOverlay').classList.remove('active');
+    $('modalContent').innerHTML = '';
+  }
+
+  // Закрытие модалки по клику на оверлей
+  $('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  // Закрытие модалки по Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && $('modalOverlay').classList.contains('active')) {
+      closeModal();
+    }
+  });
 
   function renderAdminTable() {
     const tbody = $('adminTableBody');
     tbody.innerHTML = '';
     if (allPlayers.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#888;">Нет данных</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#888;">Нет данных</td></tr>';
       return;
     }
     allPlayers.forEach(p => {
       const tr = document.createElement('tr');
+      const escapedNick = p.nick.replace(/'/g, "\\'").replace(/"/g, '"');
       tr.innerHTML = `
         <td>${p.nick}</td>
         <td>${p.ip || 'неизвестно'}</td>
-        <td><button class="btn btn-sm" style="background:#ff4444;color:#fff;border:none;padding:4px 12px;border-radius:12px;cursor:pointer;" onclick="deletePlayer('${p.nick}')">🗑️</button></td>
+        <td><button class="btn-answers" onclick="viewPlayerAnswers('${escapedNick}')">📋 Ответы</button></td>
+        <td><button class="btn btn-sm" style="background:#ff4444;color:#fff;border:none;padding:4px 12px;border-radius:12px;cursor:pointer;" onclick="deletePlayer('${escapedNick}')">🗑️</button></td>
       `;
       tbody.appendChild(tr);
     });
