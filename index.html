@@ -4,874 +4,186 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Nyash Awards · Голосование</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    :root {
-      --bg: #0a0a0a;
-      --card-bg: rgba(16, 16, 20, 0.88);
-      --text-primary: #f0f0f0;
-      --text-secondary: #b0b0b0;
-      --text-muted: #777777;
-      --border-light: rgba(255,255,255,0.06);
-      --radius: 28px;
-      --radius-sm: 40px;
-      --transition: 0.25s ease;
-    }
     body {
-      background: var(--bg);
+      background: #0a0a0a;
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 24px;
-      font-family: 'Inter', sans-serif;
-      color: var(--text-primary);
-      position: relative;
-      overflow-x: hidden;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      color: #fff;
     }
-    .ender-pillars {
-      position: fixed;
-      top: 0;
-      left: 0;
+    .container {
+      max-width: 800px;
       width: 100%;
-      height: 100%;
-      z-index: 0;
-      pointer-events: none;
-      overflow: hidden;
+      background: rgba(20,20,30,0.9);
+      border-radius: 20px;
+      padding: 30px;
+      border: 1px solid rgba(255,255,255,0.05);
     }
-    .pillar {
-      position: absolute;
-      bottom: 0;
-      width: 2px;
-      background: linear-gradient(to top, rgba(255,255,255,0) 0%, rgba(200,200,255,0.2) 50%, rgba(255,255,255,0.6) 85%, rgba(255,255,255,0.9) 100%);
-      border-radius: 2px;
-      animation: glowPulse 4s infinite alternate ease-in-out;
-      box-shadow: 0 0 15px rgba(255,255,255,0.08), 0 0 40px rgba(200,200,255,0.03);
-    }
-    .pillar:nth-child(odd) { animation-duration: 5s; }
-    .pillar:nth-child(3n) { animation-duration: 6s; animation-delay: 0.6s; }
-    .pillar:nth-child(5n+2) { animation-duration: 3.8s; animation-delay: 1.2s; }
-    .pillar:nth-child(7n+4) { animation-duration: 7s; animation-delay: 0.3s; }
-    @keyframes glowPulse {
-      0% { opacity: 0.25; filter: brightness(0.5); }
-      100% { opacity: 0.9; filter: brightness(1.3); }
-    }
-    .poll-wrapper {
-      position: relative;
-      z-index: 1;
-      max-width: 820px;
+    h1 { text-align: center; margin-bottom: 10px; font-size: 2rem; }
+    .sub { text-align: center; color: #888; margin-bottom: 20px; }
+    .step { display: none; }
+    .step.active { display: block; }
+    input, button {
       width: 100%;
-      background: var(--card-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-radius: var(--radius);
-      padding: 40px 36px 32px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.8);
-      border: 1px solid var(--border-light);
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid #333;
+      background: #1a1a1f;
+      color: #fff;
+      font-size: 1rem;
+      margin-bottom: 10px;
     }
-
-    /* ===== ПЛАШКА СОГЛАСИЯ ===== */
+    button {
+      background: #fff;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+    }
+    button:hover { background: #ddd; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .error { color: #ff4444; font-size: 0.85rem; margin-top: 5px; }
+    .question {
+      background: #1a1a1f;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      border-left: 3px solid #ffd700;
+    }
+    .question .title { font-weight: bold; font-size: 1.1rem; }
+    .question .subtitle { color: #888; font-size: 0.9rem; margin: 5px 0 10px; }
+    .options label {
+      display: block;
+      padding: 8px 12px;
+      margin: 4px 0;
+      background: #111;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .options label:hover { background: #222; }
+    .options input[type="radio"] { width: auto; margin-right: 10px; }
+    .options input[type="text"] { width: 100%; padding: 8px; margin-top: 5px; background: #111; border: 1px solid #333; color: #fff; border-radius: 6px; }
+    .status { color: #888; font-size: 0.85rem; margin-top: 5px; }
+    .progress { text-align: center; color: #888; margin: 15px 0; }
+    .final { text-align: center; padding: 30px 0; }
+    .final h2 { font-size: 2rem; color: #ffd700; }
+    .final .date { font-size: 1.5rem; color: #ffd700; margin: 10px 0; }
+    .saved-msg {
+      text-align: center;
+      padding: 10px;
+      background: #1a3a1a;
+      border-radius: 10px;
+      margin-top: 15px;
+      color: #4caf50;
+      display: none;
+    }
+    .saved-msg.show { display: block; }
     .cookie-consent {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      z-index: 9999;
-      background: rgba(10, 10, 12, 0.97);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border-top: 1px solid rgba(255,255,255,0.08);
-      padding: 18px 24px;
+      background: #111;
+      padding: 15px 20px;
       display: none;
       justify-content: center;
       align-items: center;
-      gap: 20px;
+      gap: 15px;
       flex-wrap: wrap;
-      box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
+      border-top: 1px solid #222;
+      z-index: 999;
     }
     .cookie-consent.show { display: flex; }
-    .cookie-consent .cookie-text {
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      max-width: 600px;
-      text-align: center;
-    }
-    .cookie-consent .cookie-text strong {
-      color: var(--text-primary);
-    }
-    .cookie-consent .cookie-text .more-link {
-      color: var(--text-secondary);
-      text-decoration: underline;
-      cursor: pointer;
-      font-weight: 500;
-    }
-    .cookie-consent .cookie-text .more-link:hover { color: #fff; }
-    .cookie-consent .btn-cookie {
-      background: #fff;
-      color: #0a0a0a;
-      border: none;
-      padding: 10px 32px;
-      border-radius: 40px;
-      font-weight: 600;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: var(--transition);
-      font-family: inherit;
-      flex-shrink: 0;
-    }
-    .cookie-consent .btn-cookie:hover {
-      background: #e0e0e0;
-      transform: scale(1.02);
-    }
-    .cookie-consent .btn-cookie-secondary {
-      background: transparent;
-      color: var(--text-secondary);
-      border: 1px solid rgba(255,255,255,0.1);
-      padding: 10px 24px;
-      border-radius: 40px;
-      font-weight: 500;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: var(--transition);
-      font-family: inherit;
-      flex-shrink: 0;
-    }
-    .cookie-consent .btn-cookie-secondary:hover {
-      background: rgba(255,255,255,0.05);
-      border-color: rgba(255,255,255,0.2);
-    }
-    .cookie-consent .cookie-actions {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    /* ===== МОДАЛЬНОЕ ОКНО ===== */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.85);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      z-index: 10000;
-      display: none;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-    .modal-overlay.show { display: flex; }
-    .modal-content {
-      background: #1a1a1f;
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 24px;
-      max-width: 600px;
-      width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
-      padding: 32px 28px;
-      position: relative;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.8);
-      animation: modalIn 0.3s ease;
-    }
-    @keyframes modalIn {
-      from { transform: scale(0.9); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-    .modal-content .modal-close {
-      position: absolute;
-      top: 16px;
-      right: 20px;
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-size: 1.8rem;
-      cursor: pointer;
-      transition: var(--transition);
-      font-family: inherit;
-    }
-    .modal-content .modal-close:hover {
-      color: #fff;
-      transform: rotate(90deg);
-    }
-    .modal-content h2 {
-      font-size: 1.4rem;
-      margin-bottom: 16px;
-      color: var(--text-primary);
-      font-weight: 600;
-      letter-spacing: 0.3px;
-    }
-    .modal-content p {
-      color: var(--text-secondary);
-      line-height: 1.7;
-      margin-bottom: 14px;
-      font-size: 0.95rem;
-    }
-    .modal-content .highlight {
-      color: var(--text-primary);
-      font-weight: 500;
-    }
-    .modal-content .check-list {
-      list-style: none;
-      padding: 0;
-      margin: 16px 0;
-    }
-    .modal-content .check-list li {
-      padding: 8px 0 8px 24px;
-      position: relative;
-      color: var(--text-secondary);
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-      font-size: 0.95rem;
-      line-height: 1.5;
-    }
-    .modal-content .check-list li::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 12px;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--text-muted);
-    }
-    .modal-content .check-list li:last-child { border-bottom: none; }
-    .modal-content .btn-modal-close {
-      background: #fff;
-      color: #0a0a0a;
-      border: none;
-      padding: 12px 36px;
-      border-radius: 40px;
-      font-weight: 600;
-      font-size: 0.95rem;
-      cursor: pointer;
-      transition: var(--transition);
-      font-family: inherit;
-      margin-top: 8px;
-      width: 100%;
-    }
-    .modal-content .btn-modal-close:hover {
-      background: #e0e0e0;
-    }
-
-    .header {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 28px;
-      border-bottom: 1px solid var(--border-light);
-      padding-bottom: 20px;
-    }
-    .header .shield { font-size: 2.6rem; opacity: 0.8; }
-    .header h1 { font-size: 2.0rem; font-weight: 700; letter-spacing: -0.5px; }
-    .header .year {
-      font-size: 0.9rem;
-      font-weight: 600;
-      background: rgba(255,255,255,0.05);
-      padding: 4px 16px;
-      border-radius: 40px;
-      color: var(--text-secondary);
-      margin-left: auto;
-      border: 1px solid var(--border-light);
-    }
-    .step { display: none; animation: fadeIn 0.4s ease; }
-    .step.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .step-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 24px;
-      border-left: 4px solid rgba(255,255,255,0.3);
-      padding-left: 16px;
-    }
-    .form-group { margin-bottom: 20px; }
-    .form-group label { display: block; font-weight: 500; margin-bottom: 6px; color: var(--text-secondary); }
-    .form-group input {
-      width: 100%;
-      padding: 14px 20px;
-      border-radius: var(--radius-sm);
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--border-light);
-      color: #fff;
-      font-size: 1rem;
-      font-family: inherit;
-      transition: var(--transition);
-    }
-    .form-group input:focus {
-      outline: none;
-      border-color: rgba(255,255,255,0.4);
-      background: rgba(255,255,255,0.08);
-    }
-    .form-group .error { color: #ff6b6b; font-size: 0.85rem; margin-top: 4px; }
-    .btn {
-      border: none;
-      padding: 14px 36px;
-      border-radius: var(--radius-sm);
-      font-weight: 600;
-      font-size: 0.95rem;
-      font-family: inherit;
-      cursor: pointer;
-      transition: var(--transition);
-      letter-spacing: 0.3px;
-      background: rgba(255,255,255,0.06);
-      color: var(--text-primary);
-      border: 1px solid var(--border-light);
-    }
-    .btn-primary { background: #fff; color: #0a0a0a; border-color: #fff; }
-    .btn-primary:hover:not(:disabled) { background: #e0e0e0; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255,255,255,0.1); }
-    .btn-primary:disabled { opacity: 0.3; pointer-events: none; }
-    .btn-secondary { background: transparent; border-color: rgba(255,255,255,0.15); color: var(--text-secondary); }
-    .btn-secondary:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.3); }
-    .btn-sm { padding: 10px 20px; font-size: 0.85rem; }
-    .btn-danger { background: #ff4444; color: #fff; border-color: #ff4444; }
-    .btn-danger:hover { background: #cc0000; }
-    .nomination-item {
-      margin-bottom: 32px;
-      padding-bottom: 24px;
-      border-bottom: 1px solid var(--border-light);
-    }
-    .nomination-item:last-child { border-bottom: none; }
-    .nomination-item .nom-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 4px; }
-    .nomination-item .nom-sub { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 16px; }
-    .autocomplete-wrapper { position: relative; }
-    .autocomplete-wrapper input[type="text"] {
-      width: 100%;
-      padding: 14px 20px;
-      border-radius: var(--radius-sm);
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--border-light);
-      color: #fff;
-      font-size: 1rem;
-      font-family: inherit;
-      transition: var(--transition);
-    }
-    .autocomplete-wrapper input[type="text"]:focus {
-      outline: none;
-      border-color: rgba(255,255,255,0.4);
-      background: rgba(255,255,255,0.08);
-    }
-    .autocomplete-dropdown {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      background: #1a1a1f;
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 16px;
-      margin-top: 6px;
-      max-height: 200px;
-      overflow-y: auto;
-      z-index: 10;
-      display: none;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-    }
-    .autocomplete-dropdown.active { display: block; }
-    .autocomplete-item {
-      padding: 10px 20px;
-      cursor: pointer;
-      color: #ccc;
-      transition: background 0.15s;
-      font-size: 0.95rem;
-    }
-    .autocomplete-item:hover, .autocomplete-item.selected { background: rgba(255,255,255,0.08); color: #fff; }
-    .autocomplete-item.top-candidate {
-      color: #ffd700;
-      font-weight: 600;
-    }
-    .autocomplete-item.top-candidate::before { content: '⭐ '; }
-    .candidate-options {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .candidate-option {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 14px 18px;
-      border-radius: 16px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid transparent;
-      cursor: pointer;
-      transition: var(--transition);
-      user-select: none;
-      -webkit-user-select: none;
-    }
-    .candidate-option:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); }
-    .candidate-option input[type="radio"] {
-      position: absolute;
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-    .radio-circle {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      border: 2px solid rgba(255,255,255,0.3);
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: var(--transition);
-    }
-    .candidate-option input[type="radio"]:checked ~ .radio-circle {
-      border-color: #fff;
-      background: #fff;
-      box-shadow: 0 0 12px rgba(255,255,255,0.3);
-    }
-    .candidate-option input[type="radio"]:checked ~ .radio-circle::after {
-      content: '';
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #0a0a0a;
-    }
-    .candidate-option input[type="radio"]:checked ~ span { color: #fff; }
-    .candidate-option:has(input[type="radio"]:checked) {
-      background: rgba(255,255,255,0.08);
-      border-color: rgba(255,255,255,0.2);
-    }
-    .candidate-option span { flex: 1; }
-    .nomination-status {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-top: 8px;
-    }
-    .flex-between {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .mt-20 { margin-top: 20px; }
-    .final-message {
-      text-align: center;
-      padding: 40px 20px;
-      animation: finalScale 0.6s ease;
-    }
-    @keyframes finalScale {
-      0% { transform: scale(0.8); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    .final-message .big-icon { font-size: 4rem; }
-    .final-message h2 {
-      font-size: 2.2rem;
-      margin: 16px 0 8px;
-      background: linear-gradient(135deg, #ffd700, #ffaa00);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .final-message .invite-text { font-size: 1.4rem; color: var(--text-primary); margin: 12px 0; }
-    .final-message .invite-date {
-      font-size: 2rem;
-      font-weight: 700;
-      color: #ffd700;
-      text-shadow: 0 0 30px rgba(255,215,0,0.3);
-      letter-spacing: 2px;
-    }
-    .final-message p { color: var(--text-secondary); font-size: 1rem; margin-top: 8px; }
-    .final-message .confetti { font-size: 2.5rem; letter-spacing: 10px; margin-top: 16px; }
-    .blocked-message { text-align: center; padding: 40px 20px; }
-    .blocked-message .blocked-icon { font-size: 4rem; }
-    .blocked-message h2 { font-size: 1.8rem; margin: 16px 0; color: #ff6b6b; }
-    .blocked-message p { color: var(--text-secondary); font-size: 1rem; }
-
-    .admin-panel {
-      margin-top: 30px;
-      border-top: 1px solid var(--border-light);
-      padding-top: 16px;
-      text-align: center;
-    }
-    .admin-panel .admin-toggle {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      cursor: pointer;
-      font-family: inherit;
-      transition: var(--transition);
-      padding: 6px 12px;
-      border-radius: 40px;
-    }
-    .admin-panel .admin-toggle:hover { background: rgba(255,255,255,0.04); color: #fff; }
-    .admin-content { display: none; margin-top: 20px; text-align: left; }
-    .admin-content.active { display: block; }
-    .admin-login {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-      background: rgba(255,255,255,0.02);
-      padding: 12px 16px;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border-light);
-    }
-    .admin-login input {
-      flex: 1;
-      padding: 10px 16px;
-      border-radius: var(--radius-sm);
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--border-light);
-      color: #fff;
-      font-family: inherit;
-    }
-    .admin-login input:focus { outline: none; border-color: rgba(255,255,255,0.4); }
-    .admin-login .error { color: #ff6b6b; font-size: 0.85rem; }
-    .admin-dashboard {
-      display: none;
-      background: rgba(0,0,0,0.3);
-      border-radius: var(--radius-sm);
-      padding: 16px;
-      border: 1px solid var(--border-light);
-    }
-    .admin-dashboard.active { display: block; }
-    .admin-dashboard h3 {
-      font-weight: 600;
-      color: var(--text-secondary);
-      margin-bottom: 12px;
-      font-size: 1rem;
-      letter-spacing: 0.5px;
-    }
-    .admin-table-wrap { overflow-x: auto; margin-top: 8px; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-    th, td {
-      padding: 8px 10px;
-      border: 1px solid rgba(255,255,255,0.06);
-      text-align: left;
-      vertical-align: top;
-    }
-    th { background: rgba(255,255,255,0.04); font-weight: 600; color: var(--text-secondary); }
-    td { color: var(--text-primary); }
-    .admin-actions { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
-    .nick-with-tooltip { cursor: help; border-bottom: 1px dashed rgba(255,255,255,0.3); }
-    .error-popup {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #ff4444;
-      color: #fff;
-      padding: 16px 24px;
-      border-radius: 16px;
-      z-index: 100;
-      max-width: 90%;
-      text-align: center;
-      font-weight: 600;
-      box-shadow: 0 8px 30px rgba(255,0,0,0.3);
-      display: none;
-    }
-    .error-popup.show { display: block; }
-    .error-popup .close-btn {
-      background: none;
-      border: none;
-      color: #fff;
-      font-size: 1.2rem;
-      cursor: pointer;
-      margin-left: 12px;
-    }
-    .footer-legal {
-      font-size: 0.7rem;
-      color: #555;
-      margin-top: 20px;
-      text-align: center;
-      border-top: 1px solid rgba(255,255,255,0.04);
-      padding-top: 14px;
-      line-height: 1.8;
-    }
-    .footer-legal a {
-      color: var(--text-muted);
-      text-decoration: underline;
-      cursor: pointer;
-    }
-    .footer-legal a:hover { color: #fff; }
+    .cookie-consent .text { color: #888; font-size: 0.9rem; text-align: center; }
+    .cookie-consent .btn { background: #fff; color: #000; padding: 8px 24px; border-radius: 20px; border: none; cursor: pointer; font-weight: bold; }
+    .cookie-consent .btn:hover { background: #ddd; }
     @media (max-width: 600px) {
-      .poll-wrapper { padding: 24px 16px; }
-      .header h1 { font-size: 1.5rem; }
-      .header .shield { font-size: 2rem; }
-      .btn { padding: 12px 24px; font-size: 0.9rem; width: 100%; justify-content: center; }
-      .flex-between { flex-direction: column; align-items: stretch; }
-      .admin-login { flex-direction: column; }
-      .final-message h2 { font-size: 1.6rem; }
-      .final-message .invite-date { font-size: 1.4rem; }
-      .cookie-consent {
-        padding: 16px;
-        flex-direction: column;
-        gap: 14px;
-      }
-      .cookie-consent .cookie-text { font-size: 0.8rem; }
-      .cookie-consent .btn-cookie {
-        padding: 10px 24px;
-        font-size: 0.85rem;
-        width: 100%;
-        justify-content: center;
-      }
-      .cookie-consent .btn-cookie-secondary { width: 100%; justify-content: center; }
-      .cookie-consent .cookie-actions { width: 100%; flex-direction: column; }
-      .modal-content { padding: 24px 18px; }
-      .modal-content h2 { font-size: 1.2rem; }
+      .container { padding: 15px; }
+      h1 { font-size: 1.5rem; }
     }
   </style>
 </head>
 <body>
 
-<!-- ===== ЭНДЕР-СТОЛБЫ ===== -->
-<div class="ender-pillars" id="pillarsContainer"></div>
+<div class="container">
+  <h1>🐾 Nyash Awards</h1>
+  <div class="sub">Голосование 2026</div>
 
-<!-- ===== ПЛАШКА СОГЛАСИЯ ===== -->
-<div class="cookie-consent" id="cookieConsent">
-  <div class="cookie-text">
-    <strong>Мы используем файлы cookie и собираем IP-адрес</strong> для защиты от повторного голосования.
-    Данные не передаются третьим лицам.
-    <span class="more-link" id="moreDetailsBtn">Подробнее</span>
-  </div>
-  <div class="cookie-actions">
-    <button class="btn-cookie" id="acceptCookieBtn">Согласен</button>
-    <button class="btn-cookie-secondary" id="declineCookieBtn">Отклонить</button>
-  </div>
-</div>
-
-<!-- ===== МОДАЛЬНОЕ ОКНО ===== -->
-<div class="modal-overlay" id="privacyModal">
-  <div class="modal-content">
-    <button class="modal-close" id="modalCloseBtn">✕</button>
-    <h2>Политика конфиденциальности</h2>
-    <p>Мы уважаем вашу приватность и хотим, чтобы вы чувствовали себя в безопасности на нашем сайте.</p>
-    <p><strong>Что мы собираем:</strong></p>
-    <ul class="check-list">
-      <li><strong>IP-адрес</strong> — используется только для защиты от повторного голосования с одного устройства. Мы не передаём его третьим лицам.</li>
-      <li><strong>Файлы cookie</strong> — сохраняют ваше согласие на обработку данных, чтобы плашка не появлялась при каждом визите.</li>
-      <li><strong>Ник и ответы</strong> — сохраняются локально в вашем браузере и видны только организаторам голосования.</li>
-    </ul>
-    <p><strong>Что мы НЕ делаем:</strong></p>
-    <ul class="check-list">
-      <li>Не передаём ваш IP-адрес кому-либо.</li>
-      <li>Не используем данные для отслеживания за пределами этого опроса.</li>
-      <li>Не храним данные дольше, чем это необходимо для голосования.</li>
-      <li>Не показываем ваш IP-адрес другим игрокам.</li>
-    </ul>
-    <p><strong>Как удалить данные:</strong><br>
-    Вы всегда можете попросить организаторов удалить ваши данные.</p>
-    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.04); padding-top: 12px;">
-      Последнее обновление: 30.07.2026
-    </p>
-    <button class="btn-modal-close" id="modalCloseBtn2">Понятно</button>
-  </div>
-</div>
-
-<!-- ===== ОСНОВНОЙ КОНТЕНТ ===== -->
-<div class="poll-wrapper">
-  <div class="header">
-    <span class="shield">🐾</span>
-    <h1>Nyash Awards</h1>
-    <span class="year">2026</span>
+  <!-- КУКИ -->
+  <div class="cookie-consent" id="cookieConsent">
+    <div class="text">Мы используем cookie для защиты от повторного голосования.</div>
+    <button class="btn" id="acceptBtn">Согласен</button>
   </div>
 
-  <div class="step" id="stepBlocked">
-    <div class="blocked-message">
-      <div class="blocked-icon">🚫</div>
-      <h2>Вы уже голосовали</h2>
-      <p>С этого IP-адреса уже был отправлен голос. Повторное голосование невозможно.</p>
-    </div>
-  </div>
-
+  <!-- ШАГ 1: РЕГИСТРАЦИЯ -->
   <div class="step active" id="stepRegister">
-    <div class="step-title">✏️ Представьтесь</div>
-    <div class="form-group">
-      <label>Ваш ник на сервере</label>
-      <input type="text" id="playerNick" placeholder="Введите ник" />
-      <div class="error" id="nickError"></div>
-    </div>
-    <button class="btn btn-primary" id="startSurveyBtn">Начать опрос →</button>
+    <h3>✏️ Представьтесь</h3>
+    <input type="text" id="playerNick" placeholder="Ваш ник на сервере" />
+    <div class="error" id="nickError"></div>
+    <button id="startBtn">Начать опрос →</button>
   </div>
 
+  <!-- ШАГ 2: ОПРОС -->
   <div class="step" id="stepSurvey">
-    <div class="step-title">📋 Опрос</div>
-    <div id="surveyContainer"></div>
-    <div class="flex-between mt-20">
-      <span id="progressText" style="color: var(--text-secondary);">0 / 15</span>
-      <button class="btn btn-primary" id="submitSurveyBtn" disabled>Завершить опрос</button>
-    </div>
+    <div id="questions"></div>
+    <div class="progress" id="progressText">0 / 15</div>
+    <button id="submitBtn" disabled>Завершить опрос</button>
   </div>
 
+  <!-- ШАГ 3: ФИНАЛ -->
   <div class="step" id="stepFinal">
-    <div class="final-message">
-      <div class="big-icon">🎉</div>
+    <div class="final">
+      <div style="font-size: 4rem;">🎉</div>
       <h2>Спасибо за то, что проголосовали!</h2>
-      <div class="invite-text">Вы приглашены на</div>
-      <div class="invite-date">Nyash Awards 00.08.2026</div>
-      <p>До встречи на церемонии! 🐾</p>
-      <div class="confetti">🎊✨🎊</div>
+      <div style="font-size: 1.4rem; margin: 10px 0;">Вы приглашены на</div>
+      <div class="date">Nyash Awards 00.08.2026</div>
+      <p style="color: #888; margin-top: 10px;">До встречи на церемонии! 🐾</p>
+      <div class="saved-msg" id="savedMsg">✅ Ваш голос сохранён в Google Таблице!</div>
     </div>
   </div>
-
-  <div class="admin-panel">
-    <button class="admin-toggle" id="adminToggleBtn">🔐 Админ-панель</button>
-    <div class="admin-content" id="adminContent">
-      <div class="admin-login" id="adminLogin">
-        <input type="password" id="adminPassword" placeholder="Введите пароль" />
-        <button class="btn btn-secondary btn-sm" id="adminLoginBtn">Войти</button>
-        <span class="error" id="adminLoginError"></span>
-      </div>
-      <div class="admin-dashboard" id="adminDashboard">
-        <h3>📋 Список участников</h3>
-        <div class="admin-table-wrap">
-          <table>
-            <thead><tr><th>Ник</th><th>IP</th><th>Управление</th></tr></thead>
-            <tbody id="adminTableBody"></tbody>
-          </table>
-        </div>
-        <div class="admin-actions">
-          <button class="btn btn-danger btn-sm" id="resetAllBtn">🗑️ Очистить всё</button>
-          <button class="btn btn-secondary btn-sm" id="exportJsonBtn">📥 Скачать JSON</button>
-          <button class="btn btn-secondary btn-sm" id="adminLogoutBtn">Выйти</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="footer-legal">
-    IP-адрес и cookie собираются для защиты от повторного голосования.
-    Данные не передаются третьим лицам.
-    <a id="footerMoreLink">Подробнее о политике конфиденциальности</a>
-  </div>
-</div>
-
-<!-- ===== ОКОШКО С ОШИБКОЙ ===== -->
-<div class="error-popup" id="errorPopup">
-  <span id="errorText">Ошибка</span>
-  <button class="close-btn" onclick="document.getElementById('errorPopup').classList.remove('show')">✕</button>
 </div>
 
 <script>
   // =============================================================
-  //  COOKIE CONSENT + МОДАЛЬНОЕ ОКНО
+  //  GOOGLE SHEETS — ТВОЙ URL УЖЕ ВСТАВЛЕН
   // =============================================================
-  (function initCookieConsent() {
-    const consent = localStorage.getItem('nyash_cookie_consent');
-    const modal = document.getElementById('privacyModal');
-    const cookieConsent = document.getElementById('cookieConsent');
-
-    if (consent !== 'accepted') {
-      cookieConsent.classList.add('show');
-    }
-
-    document.getElementById('acceptCookieBtn').addEventListener('click', function() {
-      localStorage.setItem('nyash_cookie_consent', 'accepted');
-      cookieConsent.classList.remove('show');
-    });
-
-    document.getElementById('declineCookieBtn').addEventListener('click', function() {
-      cookieConsent.classList.remove('show');
-    });
-
-    document.getElementById('moreDetailsBtn').addEventListener('click', function() {
-      modal.classList.add('show');
-    });
-
-    document.getElementById('footerMoreLink').addEventListener('click', function() {
-      modal.classList.add('show');
-    });
-
-    function closeModal() {
-      modal.classList.remove('show');
-    }
-    document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
-    document.getElementById('modalCloseBtn2').addEventListener('click', closeModal);
-    modal.addEventListener('click', function(e) {
-      if (e.target === modal) closeModal();
-    });
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && modal.classList.contains('show')) closeModal();
-    });
-  })();
+  const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzvTeId9tfUtVWjVYTsnCr_6uQmnuj8sW-oZLK4BEgcN3J1XqHvGl9JdcuTubA5NQ19/exec';
 
   // =============================================================
-  //  TELEGRAM CONFIG
+  //  НОМИНАЦИИ
   // =============================================================
-  const TELEGRAM_CONFIG = {
-    BOT_TOKEN: '8745636025:AAHJVvRAHmd2WmrmndLvS65sHXQPAZGD8d4',
-    CHAT_ID: '7970596319'
-  };
+  const NOMINATIONS = [
+    { id: 'best_player', title: '🏅 Лучший игрок сезона', subtitle: 'Кто показал наилучшую игру?', type: 'nick' },
+    { id: 'best_builder', title: '🏗️ Лучший строитель', subtitle: 'Чьи постройки впечатлили всех?', type: 'nick' },
+    { id: 'best_pvp', title: '⚔️ Лучший PvP-игрок', subtitle: 'Кто сильнейший на арене?', type: 'nick' },
+    { id: 'best_event', title: '🎉 Лучший ивент сезона', subtitle: 'Какое событие вам запомнилось?', type: 'test', candidates: [
+      'игра meshokdeneg "пародия на игру в кальмара"',
+      'данж Анатолия', 'испытания Strika', 'красный круг'
+    ]},
+    { id: 'best_meme', title: '😂 Лучший мем', subtitle: 'Какой мем запомнился больше всего?', type: 'test', candidates: [
+      'ядерка', 'пивной дом', 'ЭТО СПАРТА!!!!!', 'дай опку'
+    ]},
+    { id: 'best_admin', title: '🛡️ Лучший администратор', subtitle: 'Кто внёс наибольший вклад в порядок?', type: 'nick' },
+    { id: 'best_pve', title: '🧟 Лучший PvE-игрок', subtitle: 'Кто покорял данжи и боссов?', type: 'nick' },
+    { id: 'best_noob', title: '🌱 Лучший новичок', subtitle: 'Кто быстро вырос и впечатлил?', type: 'nick' },
+    { id: 'best_project', title: '📐 Лучший проект', subtitle: 'Какое коллективное творение достойно награды?', type: 'test', candidates: [
+      'данж Анатолия', 'база админов', 'бар Лорда', 'общага'
+    ]},
+    { id: 'best_farming', title: '🌾 Лучший фармер', subtitle: 'Кто собрал больше всего ресурсов?', type: 'nick' },
+    { id: 'best_redstone', title: '🔌 Лучший редстоун-инженер', subtitle: 'Чьи механизмы поражают воображение?', type: 'nick' },
+    { id: 'best_team', title: '🤝 Лучшая PvE-команда', subtitle: 'Какая команда показала лучшую слаженность?', type: 'test', candidates: [
+      'Коммунисты', 'Демократы', 'Анархисты'
+    ]},
+    { id: 'best_guildmaster', title: '🏰 Лучший глава гильдии', subtitle: 'Кто вдохновляет и объединяет игроков?', type: 'nick' },
+    { id: 'best_active', title: '🔥 Самый активный игрок', subtitle: 'Кто был на сервере чаще всех?', type: 'nick' },
+    { id: 'best_troll', title: '🧌 Главный тролль', subtitle: 'Кто главный тролль сервера?', type: 'nick' }
+  ];
 
-  function showError(text) {
-    const popup = document.getElementById('errorPopup');
-    document.getElementById('errorText').textContent = '❌ ' + text;
-    popup.classList.add('show');
-    setTimeout(() => popup.classList.remove('show'), 8000);
-  }
-
-  // =============================================================
-  //  ОТПРАВКА В TELEGRAM (C ОБНОВЛЁННЫМ ПРОКСИ)
-  // =============================================================
-  async function sendToTelegram(playerData) {
-    const { nick, ip, answers } = playerData;
-    let message = `🗳️ НОВОЕ ГОЛОСОВАНИЕ!\n\n`;
-    message += `👤 Ник: ${nick}\n`;
-    message += `📡 IP: ${ip}\n`;
-    message += `📅 Дата: ${new Date().toLocaleString()}\n\n`;
-    message += `📋 ОТВЕТЫ:\n`;
-    NOMINATIONS.forEach(nom => {
-      const answer = answers[nom.id];
-      if (answer) message += `\n${nom.title}\n  ➜ ${answer.value}`;
-    });
-    try {
-      // ИСПОЛЬЗУЕМ НОВЫЙ ПРОКСИ — api.allorigins.win
-      const url = https://149.154.167.99/bot${TELEGRAM_CONFIG.BOT_TOKEN}/sendMessage;
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: TELEGRAM_CONFIG.CHAT_ID, text: message, parse_mode: 'HTML' })
-      });
-      const result = await response.json();
-      if (!result.ok) {
-        console.error('❌ Ошибка Telegram:', result);
-        showError('Telegram: ' + (result.description || 'неизвестная ошибка'));
-        return false;
-      }
-      console.log('✅ Результаты отправлены в Telegram');
-      return true;
-    } catch (error) {
-      console.error('❌ Ошибка:', error);
-      showError('Ошибка соединения: ' + error.message);
-      return false;
-    }
-  }
-
-  // =============================================================
-  //  ЭНДЕР-СТОЛБЫ — 35 ШТУК
-  // =============================================================
-  (function createPillars() {
-    const container = document.getElementById('pillarsContainer');
-    const count = 35;
-    for (let i = 0; i < count; i++) {
-      const pillar = document.createElement('div');
-      pillar.className = 'pillar';
-      pillar.style.left = Math.random() * 100 + '%';
-      pillar.style.height = (20 + Math.random() * 80) + '%';
-      pillar.style.width = (1.5 + Math.random() * 3.5) + 'px';
-      pillar.style.animationDelay = (Math.random() * 8).toFixed(2) + 's';
-      pillar.style.animationDuration = (3 + Math.random() * 6) + 's';
-      const opacity = 0.2 + Math.random() * 0.7;
-      pillar.style.opacity = opacity;
-      container.appendChild(pillar);
-    }
-  })();
-
-  // =============================================================
-  //  ВСЕ НИКИ
-  // =============================================================
   const ALL_NICKS = [
     'Strika_Jarvis', 'Gate_ton', 'Tigr65789', 'livitody', 'meshokdeneg',
     'AppleTob', 'roma_1917', 'blebik❤️', 'Lord15986', 'Mayorcraft',
@@ -893,435 +205,235 @@
     best_troll: ['Gate_ton', 'meshokdeneg', 'AppleTob', 'Mayorcraft']
   };
 
-  const NOMINATIONS = [
-    { id: 'best_player', title: '🏅 Лучший игрок сезона', subtitle: 'Кто показал наилучшую игру?', type: 'nick' },
-    { id: 'best_builder', title: '🏗️ Лучший строитель', subtitle: 'Чьи постройки впечатлили всех?', type: 'nick' },
-    { id: 'best_pvp', title: '⚔️ Лучший PvP-игрок', subtitle: 'Кто сильнейший на арене?', type: 'nick' },
-    { id: 'best_event', title: '🎉 Лучший ивент сезона', subtitle: 'Какое событие вам запомнилось?', type: 'test', candidates: [
-      'игра meshokdeneg "пародия на игру в кальмара"',
-      'данж Анатолия', 'испытания Strika', 'красный круг'
-    ]},
-    { id: 'best_meme', title: '😂 Лучший мем', subtitle: 'Какой мем запомнился больше всего?', type: 'test', candidates: [
-      'ядерка',
-      'пивной дом (когда в доме Лорда весь воздух был заменён на пиво)',
-      'ЭТО СПАРТА!!!!!', 'дай опку (относится к meshokdeneg)'
-    ]},
-    { id: 'best_admin', title: '🛡️ Лучший администратор', subtitle: 'Кто внёс наибольший вклад в порядок?', type: 'nick' },
-    { id: 'best_pve', title: '🧟 Лучший PvE-игрок', subtitle: 'Кто покорял данжи и боссов?', type: 'nick' },
-    { id: 'best_noob', title: '🌱 Лучший новичок', subtitle: 'Кто быстро вырос и впечатлил?', type: 'nick' },
-    { id: 'best_project', title: '📐 Лучший проект', subtitle: 'Какое коллективное творение достойно награды?', type: 'test', candidates: [
-      'данж Анатолия', 'база админов (с ядерной бомбой)',
-      'бар Лорда', 'общага'
-    ]},
-    { id: 'best_farming', title: '🌾 Лучший фармер', subtitle: 'Кто собрал больше всего ресурсов?', type: 'nick' },
-    { id: 'best_redstone', title: '🔌 Лучший редстоун-инженер', subtitle: 'Чьи механизмы поражают воображение?', type: 'nick' },
-    { id: 'best_team', title: '🤝 Лучшая PvE-команда', subtitle: 'Какая команда показала лучшую слаженность?', type: 'test', candidates: [
-      'Коммунисты', 'Демократы', 'Анархисты'
-    ]},
-    { id: 'best_guildmaster', title: '🏰 Лучший глава гильдии', subtitle: 'Кто вдохновляет и объединяет игроков?', type: 'nick' },
-    { id: 'best_active', title: '🔥 Самый активный игрок', subtitle: 'Кто был на сервере чаще всех?', type: 'nick' },
-    { id: 'best_troll', title: '🧌 Главный тролль', subtitle: 'Кто главный тролль сервера?', type: 'nick' }
-  ];
+  // =============================================================
+  //  ЛОГИКА
+  // =============================================================
+  let currentPlayer = { nick: '', answers: {} };
+  let userIP = '';
 
-  const ADMIN_PASSWORD = 'admin123';
-  let currentPlayer = null;
-  let allPlayers = [];
-  let allIPs = [];
-  let userIP = null;
-  let activeAutocomplete = null;
+  const $ = id => document.getElementById(id);
+  const stepRegister = $('stepRegister');
+  const stepSurvey = $('stepSurvey');
+  const stepFinal = $('stepFinal');
+  const questionsDiv = $('questions');
+  const progressText = $('progressText');
+  const submitBtn = $('submitBtn');
+  const nickInput = $('playerNick');
+  const nickError = $('nickError');
+  const startBtn = $('startBtn');
+  const savedMsg = $('savedMsg');
 
-  const $ = (id) => document.getElementById(id);
+  // COOKIE
+  (function() {
+    if (localStorage.getItem('nyash_cookie') !== 'accepted') {
+      document.getElementById('cookieConsent').classList.add('show');
+    }
+    document.getElementById('acceptBtn').addEventListener('click', function() {
+      localStorage.setItem('nyash_cookie', 'accepted');
+      document.getElementById('cookieConsent').classList.remove('show');
+    });
+  })();
 
-  function loadAllPlayers() {
-    try { allPlayers = JSON.parse(localStorage.getItem('nyash_all_players')) || []; } catch(e) { allPlayers = []; }
-  }
-  function saveAllPlayers() { localStorage.setItem('nyash_all_players', JSON.stringify(allPlayers)); }
-  function loadAllIPs() {
-    try { allIPs = JSON.parse(localStorage.getItem('nyash_all_ips')) || []; } catch(e) { allIPs = []; }
-  }
-  function saveAllIPs() { localStorage.setItem('nyash_all_ips', JSON.stringify(allIPs)); }
-  function loadCurrentPlayer() {
-    try { currentPlayer = JSON.parse(localStorage.getItem('nyash_current_player')); } catch(e) { currentPlayer = null; }
-  }
-  function saveCurrentPlayer() {
-    if (currentPlayer) localStorage.setItem('nyash_current_player', JSON.stringify(currentPlayer));
-    else localStorage.removeItem('nyash_current_player');
-  }
-  function isIPUsed(ip) { return allIPs.includes(ip); }
-  function showStep(step) {
-    document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
-    const map = { blocked: 'stepBlocked', register: 'stepRegister', survey: 'stepSurvey', final: 'stepFinal' };
-    if (map[step]) $(map[step]).classList.add('active');
-  }
-
-  function deleteAllCookies() {
-    const cookies = document.cookie.split(";");
-    for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i];
-      const eqPos = cookie.indexOf("=");
-      const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
-      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
-      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=" + location.hostname;
-      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=." + location.hostname;
+  // IP
+  async function getIP() {
+    try {
+      const r = await fetch('https://api.ipify.org?format=json');
+      const d = await r.json();
+      return d.ip;
+    } catch(e) {
+      return 'unknown_' + Date.now();
     }
   }
 
-  async function getIP() {
+  // СОХРАНЕНИЕ В GOOGLE SHEETS
+  async function saveToGoogleSheets(playerData) {
+    const { nick, answers } = playerData;
+    
     try {
-      const resp = await fetch('https://api.ipify.org?format=json');
-      const data = await resp.json();
-      return data.ip;
-    } catch(e) { return 'unknown_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9); }
+      const response = await fetch(GOOGLE_SHEETS_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nick: nick,
+          ip: userIP,
+          date: new Date().toISOString(),
+          answers: answers
+        })
+      });
+      
+      console.log('✅ Отправлено в Google Sheets');
+      return true;
+    } catch(e) {
+      console.error('❌ Ошибка:', e);
+      return false;
+    }
   }
-  function checkAlreadyVoted(ip) { return ip && isIPUsed(ip); }
 
-  // === Регистрация ===
-  $('startSurveyBtn').addEventListener('click', async function() {
-    const nick = $('playerNick').value.trim();
-    $('nickError').textContent = '';
-    if (!nick) { $('nickError').textContent = 'Введите ник'; return; }
-    if (checkAlreadyVoted(userIP)) { showStep('blocked'); return; }
-    const existing = allPlayers.find(p => p.nick.toLowerCase() === nick.toLowerCase());
-    if (existing) { $('nickError').textContent = 'Этот ник уже используется'; return; }
-    currentPlayer = { nick, ip: userIP, answers: {}, completed: false };
-    allPlayers.push(currentPlayer);
-    saveAllPlayers(); saveCurrentPlayer();
-    showStep('survey');
-    renderSurvey();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-
-  // === Опрос ===
+  // ОТРИСОВКА ОПРОСА
   function renderSurvey() {
-    if (!currentPlayer) return;
-    const answers = currentPlayer.answers || {};
-    let html = ''; let answeredCount = 0;
+    let html = '';
+    let answered = 0;
+    const answers = currentPlayer.answers;
+
     NOMINATIONS.forEach(nom => {
       const answer = answers[nom.id] || null;
-      if (answer) answeredCount++;
-      html += `<div class="nomination-item" data-nom-id="${nom.id}">`;
-      html += `<div class="nom-title">${nom.title}</div>`;
-      html += `<div class="nom-sub">${nom.subtitle}</div>`;
+      if (answer) answered++;
+
+      html += `<div class="question" data-id="${nom.id}">`;
+      html += `<div class="title">${nom.title}</div>`;
+      html += `<div class="subtitle">${nom.subtitle}</div>`;
+
       if (nom.type === 'test') {
-        html += `<div class="candidate-options">`;
+        html += `<div class="options">`;
         nom.candidates.forEach(cand => {
           const checked = (answer && answer.value === cand) ? 'checked' : '';
-          html += `<label class="candidate-option">
-            <input type="radio" name="nom_${nom.id}" value="${escapeHtml(cand)}" ${checked} data-nom="${nom.id}" />
-            <div class="radio-circle"></div><span>${escapeHtml(cand)}</span>
+          html += `<label>
+            <input type="radio" name="q_${nom.id}" value="${cand}" ${checked} data-id="${nom.id}" />
+            ${cand}
           </label>`;
         });
         html += `</div>`;
       } else {
-        html += `<div class="autocomplete-wrapper">
-          <input type="text" class="nomination-input" data-nom="${nom.id}" placeholder="Начните вводить ник..." value="${escapeHtml(answer ? answer.value : '')}" autocomplete="off" />
-          <div class="autocomplete-dropdown"></div>
-        </div>`;
+        html += `<div class="options">`;
+        html += `<input type="text" class="nick-input" data-id="${nom.id}" placeholder="Введите ник..." value="${answer ? answer.value : ''}" />`;
+        html += `<div class="nick-suggest" data-id="${nom.id}" style="display:none;background:#222;border-radius:6px;margin-top:4px;"></div>`;
+        html += `</div>`;
       }
-      html += `<div class="nomination-status">${answer ? '✅ Отвечено' : '⏳ Ожидает ответа'}</div></div>`;
-    });
-    $('surveyContainer').innerHTML = html;
-    $('progressText').textContent = `${answeredCount} / ${NOMINATIONS.length}`;
-    $('submitSurveyBtn').disabled = (answeredCount < NOMINATIONS.length);
 
-    document.querySelectorAll('.candidate-option input[type="radio"]').forEach(radio => {
+      html += `<div class="status">${answer ? '✅ Отвечено' : '⏳ Ожидает ответа'}</div>`;
+      html += `</div>`;
+    });
+
+    questionsDiv.innerHTML = html;
+    progressText.textContent = `${answered} / ${NOMINATIONS.length}`;
+    submitBtn.disabled = (answered < NOMINATIONS.length);
+
+    // СОБЫТИЯ
+    document.querySelectorAll('input[type="radio"]').forEach(radio => {
       radio.addEventListener('change', function() {
-        const nomId = this.dataset.nom;
-        saveAnswer(nomId, { type: 'candidate', value: this.value });
+        const id = this.dataset.id;
+        currentPlayer.answers[id] = { type: 'test', value: this.value };
+        updateStatus();
       });
     });
 
-    document.querySelectorAll('.nomination-input').forEach(input => {
-      const wrapper = input.parentElement;
-      const dropdown = wrapper.querySelector('.autocomplete-dropdown');
-      const nomId = input.dataset.nom;
+    document.querySelectorAll('.nick-input').forEach(input => {
+      const id = input.dataset.id;
+      const suggestDiv = document.querySelector(`.nick-suggest[data-id="${id}"]`);
+
       input.addEventListener('input', function() {
         const val = this.value.trim();
-        if (val) saveAnswer(nomId, { type: 'nick', value: val });
-        else removeAnswer(nomId);
-        updateSurveyStatus();
-        showAutocomplete(this, dropdown, nomId);
+        if (val) {
+          currentPlayer.answers[id] = { type: 'nick', value: val };
+        } else {
+          delete currentPlayer.answers[id];
+        }
+        updateStatus();
+        showSuggestions(this, suggestDiv, id);
       });
-      input.addEventListener('focus', function() { showAutocomplete(this, dropdown, nomId); activeAutocomplete = { input, dropdown }; });
+
+      input.addEventListener('focus', function() {
+        showSuggestions(this, suggestDiv, id);
+      });
+
       input.addEventListener('blur', function() {
-        setTimeout(() => { dropdown.classList.remove('active'); if (activeAutocomplete && activeAutocomplete.input === input) activeAutocomplete = null; }, 150);
-      });
-      input.addEventListener('keydown', function(e) {
-        if (e.key === 'ArrowDown') { e.preventDefault(); navigateDropdown(dropdown, 1); }
-        else if (e.key === 'ArrowUp') { e.preventDefault(); navigateDropdown(dropdown, -1); }
-        else if (e.key === 'Enter') { e.preventDefault(); selectCurrentDropdown(dropdown, input); }
-        else if (e.key === 'Escape') { dropdown.classList.remove('active'); }
+        setTimeout(() => { suggestDiv.style.display = 'none'; }, 200);
       });
     });
-    updateSurveyStatus();
   }
 
-  function showAutocomplete(input, dropdown, nomId) {
+  function showSuggestions(input, suggestDiv, id) {
     const val = input.value.toLowerCase().trim();
-    dropdown.innerHTML = '';
-    let matches;
-    if (!val) { const topNicks = TOP_CANDIDATES[nomId] || []; matches = topNicks.length > 0 ? topNicks : ALL_NICKS; }
-    else { matches = ALL_NICKS.filter(nick => nick.toLowerCase().startsWith(val)); }
-    if (matches.length === 0) { dropdown.classList.remove('active'); return; }
-    const topNicks = TOP_CANDIDATES[nomId] || [];
-    matches.forEach(nick => {
+    suggestDiv.innerHTML = '';
+    if (!val) { suggestDiv.style.display = 'none'; return; }
+
+    const matches = ALL_NICKS.filter(n => n.toLowerCase().startsWith(val));
+    if (matches.length === 0) { suggestDiv.style.display = 'none'; return; }
+
+    const top = TOP_CANDIDATES[id] || [];
+    const allMatches = [...top.filter(t => t.toLowerCase().startsWith(val)), ...matches.filter(m => !top.includes(m))];
+
+    suggestDiv.style.display = 'block';
+    allMatches.slice(0, 6).forEach(nick => {
       const div = document.createElement('div');
-      div.className = 'autocomplete-item';
-      if (!val && topNicks.includes(nick)) div.classList.add('top-candidate');
+      div.style.cssText = 'padding:6px 10px;cursor:pointer;border-bottom:1px solid #222;';
+      if (top.includes(nick)) div.style.color = '#ffd700';
       div.textContent = nick;
-      div.addEventListener('mousedown', function(e) {
+      div.onmousedown = function(e) {
         e.preventDefault();
         input.value = nick;
-        dropdown.classList.remove('active');
-        saveAnswer(nomId, { type: 'nick', value: nick });
-        updateSurveyStatus();
-      });
-      dropdown.appendChild(div);
-    });
-    dropdown.classList.add('active');
-  }
-
-  function navigateDropdown(dropdown, direction) {
-    const items = dropdown.querySelectorAll('.autocomplete-item');
-    if (items.length === 0) return;
-    let selected = dropdown.querySelector('.autocomplete-item.selected');
-    let idx = selected ? Array.from(items).indexOf(selected) : -1;
-    if (selected) selected.classList.remove('selected');
-    idx += direction;
-    if (idx >= items.length) idx = 0;
-    if (idx < 0) idx = items.length - 1;
-    items[idx].classList.add('selected');
-    items[idx].scrollIntoView({ block: 'nearest' });
-  }
-
-  function selectCurrentDropdown(dropdown, input) {
-    const selected = dropdown.querySelector('.autocomplete-item.selected');
-    if (selected) {
-      input.value = selected.textContent;
-      dropdown.classList.remove('active');
-      const nomId = input.dataset.nom;
-      saveAnswer(nomId, { type: 'nick', value: selected.textContent });
-      updateSurveyStatus();
-    }
-  }
-
-  function saveAnswer(nomId, answer) {
-    if (!currentPlayer) return;
-    if (!currentPlayer.answers) currentPlayer.answers = {};
-    currentPlayer.answers[nomId] = answer;
-    saveCurrentPlayer();
-    const idx = allPlayers.findIndex(p => p.nick === currentPlayer.nick && p.ip === currentPlayer.ip);
-    if (idx !== -1) { allPlayers[idx].answers = currentPlayer.answers; saveAllPlayers(); }
-    updateSurveyStatus();
-  }
-
-  function removeAnswer(nomId) {
-    if (!currentPlayer || !currentPlayer.answers) return;
-    delete currentPlayer.answers[nomId];
-    saveCurrentPlayer();
-    const idx = allPlayers.findIndex(p => p.nick === currentPlayer.nick && p.ip === currentPlayer.ip);
-    if (idx !== -1) { allPlayers[idx].answers = currentPlayer.answers; saveAllPlayers(); }
-    updateSurveyStatus();
-  }
-
-  function updateSurveyStatus() {
-    if (!currentPlayer) return;
-    const answers = currentPlayer.answers || {};
-    let answeredCount = 0;
-    NOMINATIONS.forEach(nom => { if (answers[nom.id]) answeredCount++; });
-    $('progressText').textContent = `${answeredCount} / ${NOMINATIONS.length}`;
-    $('submitSurveyBtn').disabled = (answeredCount < NOMINATIONS.length);
-    document.querySelectorAll('.nomination-item').forEach(item => {
-      const nomId = item.dataset.nomId;
-      const statusDiv = item.querySelector('.nomination-status');
-      if (statusDiv) statusDiv.textContent = answers[nomId] ? '✅ Отвечено' : '⏳ Ожидает ответа';
+        currentPlayer.answers[id] = { type: 'nick', value: nick };
+        updateStatus();
+        suggestDiv.style.display = 'none';
+      };
+      suggestDiv.appendChild(div);
     });
   }
 
-  // === Завершение опроса ===
-  $('submitSurveyBtn').addEventListener('click', async function() {
-    if (!currentPlayer) return;
-    const allAnswered = NOMINATIONS.every(nom => currentPlayer.answers[nom.id]);
-    if (!allAnswered) { alert('Ответьте на все вопросы!'); return; }
-    if (isIPUsed(currentPlayer.ip)) { alert('С этого IP уже голосовали.'); showStep('blocked'); return; }
-    currentPlayer.completed = true;
-    saveCurrentPlayer();
-    if (currentPlayer.ip && !isIPUsed(currentPlayer.ip)) { allIPs.push(currentPlayer.ip); saveAllIPs(); }
-    const idx = allPlayers.findIndex(p => p.nick === currentPlayer.nick && p.ip === currentPlayer.ip);
-    if (idx !== -1) { allPlayers[idx].completed = true; saveAllPlayers(); }
-    await sendToTelegram(currentPlayer);
-    showStep('final');
-  });
+  function updateStatus() {
+    let answered = 0;
+    NOMINATIONS.forEach(nom => {
+      if (currentPlayer.answers[nom.id]) answered++;
+    });
+    progressText.textContent = `${answered} / ${NOMINATIONS.length}`;
+    submitBtn.disabled = (answered < NOMINATIONS.length);
 
-  function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
+    document.querySelectorAll('.question').forEach(q => {
+      const id = q.dataset.id;
+      const status = q.querySelector('.status');
+      if (currentPlayer.answers[id]) {
+        status.textContent = '✅ Отвечено';
+      } else {
+        status.textContent = '⏳ Ожидает ответа';
+      }
+    });
   }
 
-  // === Админ-панель ===
-  let adminLoggedIn = false;
+  // === ЗАПУСК ===
+  startBtn.addEventListener('click', async function() {
+    const nick = nickInput.value.trim();
+    if (!nick) { nickError.textContent = 'Введите ник'; return; }
+    nickError.textContent = '';
+    userIP = await getIP();
 
-  function deletePlayer(nick) {
-    if (!confirm(`Удалить игрока ${nick}?\nОн сможет пройти опрос заново.`)) return;
-    const playerToDelete = allPlayers.find(p => p.nick === nick);
-    if (playerToDelete && playerToDelete.ip) {
-      allIPs = allIPs.filter(ip => ip !== playerToDelete.ip);
-      saveAllIPs();
-    }
-    allPlayers = allPlayers.filter(p => p.nick !== nick);
-    saveAllPlayers();
-    if (currentPlayer && currentPlayer.nick === nick) { currentPlayer = null; saveCurrentPlayer(); }
-    deleteAllCookies();
-    renderAdminTable();
-    alert(`${nick} удалён! Теперь он может проголосовать заново.`);
-  }
-
-  function resetAllData() {
-    if (!confirm('ВНИМАНИЕ! Это удалит ВСЕ голоса и всех игроков. Продолжить?')) return;
-    if (!confirm('Вы уверены? Это действие необратимо.')) return;
-    localStorage.removeItem('nyash_all_players');
-    localStorage.removeItem('nyash_all_ips');
-    localStorage.removeItem('nyash_current_player');
-    allPlayers = [];
-    allIPs = [];
-    currentPlayer = null;
-    deleteAllCookies();
-    renderAdminTable();
-    alert('Все данные сброшены. Теперь можно начинать голосование заново.');
-  }
-
-  function renderAdminTable() {
-    const tbody = $('adminTableBody');
-    tbody.innerHTML = '';
-    if (allPlayers.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--text-muted);">Нет данных</td></tr>';
+    // Проверяем, не голосовал ли уже этот IP
+    const stored = localStorage.getItem('nyash_voted_ips') || '[]';
+    const votedIPs = JSON.parse(stored);
+    if (votedIPs.includes(userIP)) {
+      alert('С этого IP уже голосовали!');
       return;
     }
-    allPlayers.forEach(p => {
-      const tr = document.createElement('tr');
-      let tooltipText = '';
-      if (p.answers) {
-        const parts = [];
-        NOMINATIONS.forEach(nom => {
-          const a = p.answers[nom.id];
-          parts.push(a ? `${nom.title}: ${a.value}` : `${nom.title}: не отвечено`);
-        });
-        tooltipText = parts.join('\n');
-      } else { tooltipText = 'Нет ответов'; }
-      tr.innerHTML = `
-        <td><span class="nick-with-tooltip" data-tooltip="${escapeHtml(tooltipText).replace(/"/g, '&quot;')}">${escapeHtml(p.nick)} ${p.completed ? '✅' : '⏳'}</span></td>
-        <td style="font-size:0.8rem; color:var(--text-muted);">${escapeHtml(p.ip || 'неизвестно')}</td>
-        <td><button class="btn btn-sm delete-player-btn" data-nick="${escapeHtml(p.nick)}" style="background:#ff4444; color:#fff; border:none; padding:6px 14px; font-size:0.8rem; cursor:pointer; border-radius:20px;">🗑️ Сброс</button></td>`;
-      tbody.appendChild(tr);
-    });
 
-    document.querySelectorAll('.delete-player-btn').forEach(btn => {
-      btn.addEventListener('click', function() { deletePlayer(this.dataset.nick); });
-    });
+    currentPlayer.nick = nick;
+    currentPlayer.answers = {};
+    stepRegister.classList.remove('active');
+    stepSurvey.classList.add('active');
+    renderSurvey();
+  });
 
-    let tooltipEl = document.getElementById('admin-tooltip');
-    if (!tooltipEl) {
-      tooltipEl = document.createElement('div');
-      tooltipEl.id = 'admin-tooltip';
-      tooltipEl.style.cssText = `
-        position: fixed; background: #1a1a1f; border: 1px solid rgba(255,255,255,0.15);
-        border-radius: 12px; padding: 12px 16px; font-size: 0.8rem; color: #ccc;
-        max-width: 400px; z-index: 9999; pointer-events: none; display: none;
-        white-space: pre-line; box-shadow: 0 10px 30px rgba(0,0,0,0.8); line-height: 1.5;
-      `;
-      document.body.appendChild(tooltipEl);
+  submitBtn.addEventListener('click', async function() {
+    const allAnswered = NOMINATIONS.every(nom => currentPlayer.answers[nom.id]);
+    if (!allAnswered) {
+      alert('Ответьте на все вопросы!');
+      return;
     }
-    document.querySelectorAll('.nick-with-tooltip').forEach(el => {
-      el.addEventListener('mouseenter', function(e) {
-        tooltipEl.textContent = this.dataset.tooltip;
-        tooltipEl.style.display = 'block';
-        updateTooltipPosition(e);
-      });
-      el.addEventListener('mousemove', updateTooltipPosition);
-      el.addEventListener('mouseleave', () => tooltipEl.style.display = 'none');
-    });
-  }
 
-  function updateTooltipPosition(e) {
-    const tooltipEl = document.getElementById('admin-tooltip');
-    if (!tooltipEl) return;
-    let x = e.clientX + 15, y = e.clientY + 15;
-    const rect = tooltipEl.getBoundingClientRect();
-    if (x + 400 > window.innerWidth) x = e.clientX - 420;
-    if (y + rect.height > window.innerHeight) y = e.clientY - rect.height - 10;
-    tooltipEl.style.left = x + 'px';
-    tooltipEl.style.top = y + 'px';
-  }
+    // Сохраняем IP
+    const stored = localStorage.getItem('nyash_voted_ips') || '[]';
+    const votedIPs = JSON.parse(stored);
+    votedIPs.push(userIP);
+    localStorage.setItem('nyash_voted_ips', JSON.stringify(votedIPs));
 
-  function exportJson() {
-    const data = { players: allPlayers, usedIPs: allIPs, exportDate: new Date().toISOString() };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'nyash_awards_data.json';
-    a.click();
-    URL.revokeObjectURL(a.href);
-  }
-
-  // === Админ-панель обработчики ===
-  $('adminToggleBtn').addEventListener('click', function() {
-    const active = $('adminContent').classList.toggle('active');
-    this.textContent = active ? '🔒 Скрыть админ-панель' : '🔐 Админ-панель';
-    if (active && adminLoggedIn) { $('adminLogin').style.display = 'none'; $('adminDashboard').classList.add('active'); renderAdminTable(); }
-    else if (active) { $('adminLogin').style.display = 'flex'; $('adminDashboard').classList.remove('active'); }
+    // Сохраняем в Google Sheets
+    await saveToGoogleSheets(currentPlayer);
+    
+    savedMsg.classList.add('show');
+    stepSurvey.classList.remove('active');
+    stepFinal.classList.add('active');
   });
-
-  $('adminLoginBtn').addEventListener('click', function() {
-    if ($('adminPassword').value.trim() === ADMIN_PASSWORD) {
-      adminLoggedIn = true;
-      $('adminLogin').style.display = 'none';
-      $('adminDashboard').classList.add('active');
-      $('adminLoginError').textContent = '';
-      renderAdminTable();
-    } else { $('adminLoginError').textContent = 'Неверный пароль'; }
-  });
-
-  $('adminPassword').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') $('adminLoginBtn').click();
-  });
-
-  $('adminLogoutBtn').addEventListener('click', function() {
-    adminLoggedIn = false;
-    $('adminLogin').style.display = 'flex';
-    $('adminDashboard').classList.remove('active');
-    $('adminPassword').value = '';
-    $('adminLoginError').textContent = '';
-  });
-
-  $('exportJsonBtn').addEventListener('click', exportJson);
-  $('resetAllBtn').addEventListener('click', resetAllData);
-
-  // === Инициализация ===
-  async function initApp() {
-    loadAllPlayers();
-    loadAllIPs();
-    userIP = await getIP();
-    if (checkAlreadyVoted(userIP)) { showStep('blocked'); return; }
-    loadCurrentPlayer();
-    if (currentPlayer) {
-      if (currentPlayer.completed) {
-        if (!isIPUsed(currentPlayer.ip)) { allIPs.push(currentPlayer.ip); saveAllIPs(); }
-        showStep('final');
-      } else if (Object.keys(currentPlayer.answers || {}).length > 0) {
-        showStep('survey');
-        renderSurvey();
-      } else {
-        localStorage.removeItem('nyash_current_player');
-        currentPlayer = null;
-        showStep('register');
-      }
-    } else {
-      showStep('register');
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', initApp);
 </script>
 </body>
 </html>
