@@ -965,7 +965,6 @@
 
   // Просмотр ответов игрока в модальном окне
   function viewPlayerAnswers(nick) {
-    loadAllPlayers();
     const player = allPlayers.find(function(p) { return p.nick === nick; });
     if (!player || !player.answers) {
       alert('Нет данных об ответах этого игрока.');
