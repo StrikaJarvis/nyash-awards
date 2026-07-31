@@ -505,6 +505,11 @@
           <button class="btn btn-secondary btn-sm" id="exportJsonBtn">📥 Скачать JSON</button>
           <button class="btn btn-secondary btn-sm" id="adminLogoutBtn">Выйти</button>
         </div>
+        <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-light);">
+          <h3>🚫 Заблокированные IP</h3>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:8px;">Удалите IP, чтобы игрок смог проголосовать заново.</p>
+          <div id="votedIPsList" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -550,7 +555,7 @@
   };
 
   // =============================================================
-  //  15 НОМИНАЦИЙ (best_noob теперь type: 'nick')
+  //  15 НОМИНАЦИЙ
   // =============================================================
   const NOMINATIONS = [
     { id: 'best_player', title: '🏅 Лучший игрок сезона', subtitle: 'Кто показал наилучшую игру?', type: 'nick' },
@@ -657,31 +662,26 @@
       const answer = answers[nom.id] || null;
       if (answer) answered++;
 
-      html += `<div class="nomination-item" data-id="${nom.id}">`;
-      html += `<div class="nom-title">${nom.title}</div>`;
-      html += `<div class="nom-sub">${nom.subtitle}</div>`;
+      html += '<div class="nomination-item" data-id="' + nom.id + '">';
+      html += '<div class="nom-title">' + nom.title + '</div>';
+      html += '<div class="nom-sub">' + nom.subtitle + '</div>';
 
       if (nom.type === 'test') {
-        html += `<div class="candidate-options">`;
+        html += '<div class="candidate-options">';
         nom.candidates.forEach(cand => {
           const checked = (answer && answer.value === cand) ? 'checked' : '';
-          html += `
-            <label class="candidate-option">
-              <input type="radio" name="q_${nom.id}" value="${cand}" ${checked} data-id="${nom.id}" />
-              <div class="radio-circle"></div>
-              <span>${cand}</span>
-            </label>`;
+          html += '<label class="candidate-option"><input type="radio" name="q_' + nom.id + '" value="' + cand + '" ' + checked + ' data-id="' + nom.id + '" /><div class="radio-circle"></div><span>' + cand + '</span></label>';
         });
-        html += `</div>`;
+        html += '</div>';
       } else {
-        html += `<div class="autocomplete-wrapper">`;
-        html += `<input type="text" class="nick-input" data-id="${nom.id}" placeholder="Начните вводить ник..." value="${answer ? answer.value : ''}" autocomplete="off" />`;
-        html += `<div class="autocomplete-dropdown" data-id="${nom.id}"></div>`;
-        html += `</div>`;
+        html += '<div class="autocomplete-wrapper">';
+        html += '<input type="text" class="nick-input" data-id="' + nom.id + '" placeholder="Начните вводить ник..." value="' + (answer ? answer.value : '') + '" autocomplete="off" />';
+        html += '<div class="autocomplete-dropdown" data-id="' + nom.id + '"></div>';
+        html += '</div>';
       }
 
-      html += `<div class="nomination-status">${answer ? '✅ Отвечено' : '⏳ Ожидает ответа'}</div>`;
-      html += `</div>`;
+      html += '<div class="nomination-status">' + (answer ? '✅ Отвечено' : '⏳ Ожидает ответа') + '</div>';
+      html += '</div>';
     });
 
     surveyContainer.innerHTML = html;
@@ -700,7 +700,7 @@
     // СОБЫТИЯ ДЛЯ АВТОДОПОЛНЕНИЯ
     document.querySelectorAll('.nick-input').forEach(input => {
       const id = input.dataset.id;
-      const dropdown = document.querySelector(`.autocomplete-dropdown[data-id="${id}"]`);
+      const dropdown = document.querySelector('.autocomplete-dropdown[data-id="' + id + '"]');
 
       input.addEventListener('focus', function() {
         showTopCandidates(dropdown, id);
@@ -719,7 +719,7 @@
       });
 
       input.addEventListener('blur', function() {
-        setTimeout(() => { dropdown.classList.remove('active'); }, 200);
+        setTimeout(function() { dropdown.classList.remove('active'); }, 200);
       });
 
       input.addEventListener('keydown', function(e) {
@@ -740,13 +740,13 @@
       return;
     }
 
-    top.forEach(nick => {
+    top.forEach(function(nick) {
       const div = document.createElement('div');
       div.className = 'autocomplete-item top-candidate';
       div.textContent = nick;
       div.addEventListener('mousedown', function(e) {
         e.preventDefault();
-        const input = document.querySelector(`.nick-input[data-id="${id}"]`);
+        const input = document.querySelector('.nick-input[data-id="' + id + '"]');
         input.value = nick;
         currentPlayer.answers[id] = { type: 'nick', value: nick };
         updateStatus();
@@ -767,13 +767,13 @@
       return;
     }
 
-    let matches = ALL_NICKS.filter(nick => nick.toLowerCase().startsWith(val));
+    let matches = ALL_NICKS.filter(function(nick) { return nick.toLowerCase().startsWith(val); });
     if (matches.length === 0) { dropdown.classList.remove('active'); return; }
 
     const top = TOP_CANDIDATES[id] || [];
-    const sorted = [...top.filter(t => t.toLowerCase().startsWith(val)), ...matches.filter(m => !top.includes(m))];
+    const sorted = top.filter(function(t) { return t.toLowerCase().startsWith(val); }).concat(matches.filter(function(m) { return !top.includes(m); }));
 
-    sorted.slice(0, 6).forEach(nick => {
+    sorted.slice(0, 6).forEach(function(nick) {
       const div = document.createElement('div');
       div.className = 'autocomplete-item';
       if (top.includes(nick)) div.classList.add('top-candidate');
@@ -816,13 +816,13 @@
 
   function updateStatus() {
     let answered = 0;
-    NOMINATIONS.forEach(nom => {
+    NOMINATIONS.forEach(function(nom) {
       if (currentPlayer.answers[nom.id]) answered++;
     });
-    progressText.textContent = `${answered} / ${NOMINATIONS.length}`;
+    progressText.textContent = answered + ' / ' + NOMINATIONS.length;
     submitBtn.disabled = (answered < NOMINATIONS.length);
 
-    document.querySelectorAll('.nomination-item').forEach(item => {
+    document.querySelectorAll('.nomination-item').forEach(function(item) {
       const id = item.dataset.id;
       const status = item.querySelector('.nomination-status');
       if (currentPlayer.answers[id]) {
@@ -857,7 +857,7 @@
   });
 
   submitBtn.addEventListener('click', async function() {
-    const allAnswered = NOMINATIONS.every(nom => currentPlayer.answers[nom.id]);
+    const allAnswered = NOMINATIONS.every(function(nom) { return currentPlayer.answers[nom.id]; });
     if (!allAnswered) {
       alert('Ответьте на все вопросы!');
       return;
@@ -901,21 +901,25 @@
   function saveAllIPs() { localStorage.setItem('nyash_all_ips', JSON.stringify(allIPs)); }
 
   function deletePlayer(nick) {
-    if (!confirm(`Удалить игрока ${nick}?`)) return;
-    const player = allPlayers.find(p => p.nick === nick);
+    if (!confirm('Удалить игрока ' + nick + '?')) return;
+    const player = allPlayers.find(function(p) { return p.nick === nick; });
     if (player && player.ip) {
-      allIPs = allIPs.filter(ip => ip !== player.ip);
+      allIPs = allIPs.filter(function(ip) { return ip !== player.ip; });
       saveAllIPs();
+      const votedIPs = JSON.parse(localStorage.getItem('nyash_voted_ips') || '[]');
+      const updatedVotedIPs = votedIPs.filter(function(ip) { return ip !== player.ip; });
+      localStorage.setItem('nyash_voted_ips', JSON.stringify(updatedVotedIPs));
     }
-    allPlayers = allPlayers.filter(p => p.nick !== nick);
+    allPlayers = allPlayers.filter(function(p) { return p.nick !== nick; });
     saveAllPlayers();
     renderAdminTable();
+    renderVotedIPsList();
   }
 
   // Просмотр ответов игрока в модальном окне
   function viewPlayerAnswers(nick) {
     loadAllPlayers();
-    const player = allPlayers.find(p => p.nick === nick);
+    const player = allPlayers.find(function(p) { return p.nick === nick; });
     if (!player || !player.answers) {
       alert('Нет данных об ответах этого игрока.');
       return;
@@ -924,19 +928,19 @@
     const modal = $('modalContent');
     const overlay = $('modalOverlay');
 
-    let html = `<h2>📋 Ответы игрока: ${player.nick}</h2>`;
-    html += `<p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:16px;">IP: ${player.ip || 'неизвестно'} · ${new Date(player.date).toLocaleString('ru-RU')}</p>`;
+    let html = '<h2>📋 Ответы игрока: ' + player.nick + '</h2>';
+    html += '<p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:16px;">IP: ' + (player.ip || 'неизвестно') + ' · ' + new Date(player.date).toLocaleString('ru-RU') + '</p>';
 
-    NOMINATIONS.forEach(nom => {
+    NOMINATIONS.forEach(function(nom) {
       const ans = player.answers[nom.id];
       const value = ans ? ans.value : '—';
-      html += `<div class="answer-row">`;
-      html += `<span class="answer-nom">${nom.title}</span>`;
-      html += `<span class="answer-val${ans ? '' : ''}">${value}</span>`;
-      html += `</div>`;
+      html += '<div class="answer-row">';
+      html += '<span class="answer-nom">' + nom.title + '</span>';
+      html += '<span class="answer-val">' + value + '</span>';
+      html += '</div>';
     });
 
-    html += `<button class="modal-close" onclick="closeModal()">Закрыть</button>`;
+    html += '<button class="modal-close" onclick="closeModal()">Закрыть</button>';
     modal.innerHTML = html;
     overlay.classList.add('active');
   }
@@ -965,15 +969,10 @@
       tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#888;">Нет данных</td></tr>';
       return;
     }
-    allPlayers.forEach(p => {
+    allPlayers.forEach(function(p) {
       const tr = document.createElement('tr');
       const escapedNick = p.nick.replace(/'/g, "\\'").replace(/"/g, '"');
-      tr.innerHTML = `
-        <td>${p.nick}</td>
-        <td>${p.ip || 'неизвестно'}</td>
-        <td><button class="btn-answers" onclick="viewPlayerAnswers('${escapedNick}')">📋 Ответы</button></td>
-        <td><button class="btn btn-sm" style="background:#ff4444;color:#fff;border:none;padding:4px 12px;border-radius:12px;cursor:pointer;" onclick="deletePlayer('${escapedNick}')">🗑️</button></td>
-      `;
+      tr.innerHTML = '<td>' + p.nick + '</td><td>' + (p.ip || 'неизвестно') + '</td><td><button class="btn-answers" onclick="viewPlayerAnswers(\'' + escapedNick + '\')">📋 Ответы</button></td><td><button class="btn btn-sm" style="background:#ff4444;color:#fff;border:none;padding:4px 12px;border-radius:12px;cursor:pointer;" onclick="deletePlayer(\'' + escapedNick + '\')">🗑️</button></td>';
       tbody.appendChild(tr);
     });
   }
@@ -1010,6 +1009,7 @@
       loadAllPlayers();
       loadAllIPs();
       renderAdminTable();
+      renderVotedIPsList();
     } else {
       $('adminLoginError').textContent = 'Неверный пароль';
     }
@@ -1028,6 +1028,40 @@
   });
 
   $('exportJsonBtn').addEventListener('click', exportJson);
+
+  // =============================================================
+  //  СПИСОК ЗАБЛОКИРОВАННЫХ IP
+  // =============================================================
+  function getVotedIPs() {
+    try { return JSON.parse(localStorage.getItem('nyash_voted_ips') || '[]'); } catch(e) { return []; }
+  }
+
+  function removeVotedIP(ip) {
+    if (!confirm('Разблокировать IP ' + ip + '? Игрок сможет проголосовать заново.')) return;
+    const votedIPs = getVotedIPs();
+    const updated = votedIPs.filter(function(vip) { return vip !== ip; });
+    localStorage.setItem('nyash_voted_ips', JSON.stringify(updated));
+    // Также обновляем allIPs
+    allIPs = allIPs.filter(function(aip) { return aip !== ip; });
+    saveAllIPs();
+    renderVotedIPsList();
+  }
+
+  function renderVotedIPsList() {
+    const container = $('votedIPsList');
+    if (!container) return;
+    const votedIPs = getVotedIPs();
+    if (votedIPs.length === 0) {
+      container.innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem;">Нет заблокированных IP</span>';
+      return;
+    }
+    container.innerHTML = votedIPs.map(function(ip) {
+      const escapedIP = ip.replace(/'/g, "\\'");
+      const player = allPlayers.find(function(p) { return p.ip === ip; });
+      const label = player ? player.nick + ' (' + ip + ')' : ip;
+      return '<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,80,80,0.15);border:1px solid rgba(255,80,80,0.3);padding:4px 12px;border-radius:20px;font-size:0.8rem;color:#ff6b6b;">🚫 ' + label + ' <button onclick="removeVotedIP(\'' + escapedIP + '\')" style="background:none;border:none;color:#ff6b6b;cursor:pointer;font-size:1rem;padding:0;line-height:1;" title="Разблокировать">✕</button></span>';
+    }).join('');
+  }
 
   // =============================================================
   //  ИНИЦИАЛИЗАЦИЯ
