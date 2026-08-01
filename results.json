@@ -1,24 +1,6 @@
 {
   "players": [
-    {
-      "nick": "Strika_Jarvis",
-      "ip": "85.12.34.56",
-      "date": "2026-07-31T19:45:00+03:00",
-      "answers": {"best_player":{"type":"nick","value":"Mayorcraft"},
-      "best_builder":{"type":"nick","value":"meshokdeneg"},
-      "best_pvp":{"type":"nick","value":"Gate_ton"},
-      "best_event":{"type":"test","value":"данж Анатолия"},
-      "best_meme":{"type":"test","value":"дай опку (относится к meshokdeneg)"},
-      "best_admin":{"type":"nick","value":"meshokdeneg"},
-      "best_pve":{"type":"nick","value":"blebik❤️"},
-      "best_noob":{"type":"nick","value":"tomatoma"},
-      "best_project":{"type":"test","value":"данж Анатолия"},
-      "best_farming":{"type":"nick","value":"tomatoma"},
-      "best_redstone":{"type":"nick","value":"Strika_Jarvis"},
-      "best_team":{"type":"test","value":"Коммунисты"},
-      "best_guildmaster":{"type":"nick","value":"Mayorcraft"},
-      "best_active":{"type":"nick","value":"blebik❤️"},
-      "best_troll":{"type":"nick","value":"Gate_ton"}}
+    {Mayorkraft	104.28.200.200	2026-08-01T14:03:46.570Z	{"best_meme":{"type":"test","value":"ЭТО СПАРТА!!!!!"},"best_project":{"type":"test","value":"общага"},"best_troll":{"type":"nick","value":"Gate_ton"},"best_active":{"type":"nick","value":"meshokdeneg"},"best_guildmaster":{"type":"nick","value":"Mayorcraft"},"best_team":{"type":"test","value":"Коммунисты"},"best_redstone":{"type":"nick","value":"Strika_Jarvis"},"best_farming":{"type":"nick","value":"tomatoma"},"best_noob":{"type":"nick","value":"GG_Chaika"},"best_pve":{"type":"nick","value":"blebik❤️"},"best_admin":{"type":"nick","value":"AppleTob"},"best_event":{"type":"test","value":"данж Анатолия"},"best_pvp":{"type":"nick","value":"blebik❤️"},"best_player":{"type":"nick","value":"blebik❤️"},"best_builder":{"type":"nick","value":"Sato77"}}
       }
     }
   ],
